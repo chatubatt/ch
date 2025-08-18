@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academia Control Desk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-blue': '#3B82F6',
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <div id="auth-container" class="min-h-screen bg-gray-50 flex flex-col justify-center items-center p-4">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <img src="https://r2.flowith.net/files/o/1751089023955-modern_minimalist_logo_for_training_app_index_0@1024x1024.png" alt="Academia Control Desk Logo" class="h-16 w-16 mx-auto mb-4">
+                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Academia Control Desk</h1>
+            </div>
+    
+            <div id="login-view">
+                <form id="login-form" class="bg-white p-8 rounded-xl shadow-lg space-y-6 border border-gray-200">
+                    <h2 class="text-2xl font-semibold text-center text-gray-800">Login</h2>
+                    <div>
+                        <label for="login-email" class="block text-sm font-medium text-gray-700">E-mail</label>
+                        <input type="email" id="login-email" name="email" required autocomplete="email" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="login-password" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="login-password" name="password" required autocomplete="current-password" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm">
+                    </div>
+                     <p id="login-feedback" class="text-red-600 text-sm text-center !mt-4 hidden"></p>
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue transition-colors">
+                        Entrar
+                    </button>
+                </form>
+                <p class="mt-6 text-center text-sm text-gray-600">
+                    Não tem uma conta?
+                    <button id="show-register-form" class="font-medium text-brand-blue hover:text-blue-700">
+                        Cadastre-se
+                    </button>
+                </p>
+            </div>
+    
+            <div id="register-view" class="hidden">
+                 <form id="register-form" class="bg-white p-8 rounded-xl shadow-lg space-y-6 border border-gray-200">
+                    <h2 class="text-2xl font-semibold text-center text-gray-800">Cadastro</h2>
+                    <div>
+                        <label for="register-name" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                        <input type="text" id="register-name" name="name" required autocomplete="name" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="register-email" class="block text-sm font-medium text-gray-700">E-mail</label>
+                        <input type="email" id="register-email" name="email" required autocomplete="email" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="register-password" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="register-password" name="password" required autocomplete="new-password" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-blue focus:border-brand-blue sm:text-sm">
+                    </div>
+                    <p id="register-feedback" class="text-red-600 text-sm text-center !mt-4 hidden"></p>
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue transition-colors">
+                        Criar conta
+                    </button>
+                </form>
+                <p class="mt-6 text-center text-sm text-gray-600">
+                    Já tem uma conta?
+                    <button id="show-login-form" class="font-medium text-brand-blue hover:text-blue-700">
+                        Faça login
+                    </button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-content" class="hidden flex flex-col min-h-screen">
+        <header id="header" class="bg-white/80 backdrop-blur-lg border-b border-gray-200/80 sticky top-0 left-0 right-0 z-50 transition-shadow duration-300">
+            <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+                <a href="#dashboard" class="flex items-center space-x-3">
+                    <img src="https://r2.flowith.net/files/o/1751089023955-modern_minimalist_logo_for_training_app_index_0@1024x1024.png" alt="Academia Control Desk Logo" class="h-10 w-10">
+                    <span class="text-xl font-bold text-gray-900 tracking-tight">Academia Control Desk</span>
+                </a>
+                <div class="hidden md:flex items-center space-x-2 lg:space-x-4">
+                    <a href="#dashboard" class="nav-link">Dashboard</a>
+                    <a href="#training" class="nav-link">Treinamento</a>
+                    <a href="#flashcards" class="nav-link">Flashcards</a>
+                    <a href="#advanced-indicators" class="nav-link">Indicadores Avançados</a>
+                    <a href="#report-challenge" class="nav-link">Desafio de Relatórios</a>
+                    <a href="#training-games" class="nav-link">Jogos de Treinamento</a>
+                    <a href="#simulator" class="nav-link">Simulador</a>
+                    <a href="#ranking" class="nav-link">Ranking</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="welcome-message" class="hidden md:block text-sm font-semibold text-gray-700"></span>
+                    <button id="logout-btn" class="hidden bg-gray-100 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors text-sm">
+                        Sair
+                    </button>
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none">
+                        <i data-lucide="menu" class="h-6 w-6"></i>
+                    </button>
+                </div>
+            </nav>
+            <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-200">
+                <a href="#dashboard" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 nav-link-mobile">Dashboard</a>
+                <a href="#training" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 nav-link-mobile">Treinamento</a>
+                <a href="#flashcards" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 nav-link-mobile">Flashcards</a>
+                <a href="#advanced-indicators" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 nav-link-mobile">Indicadores Avançados</a>
+                <a href="#report-challenge" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 nav-link-mobile">Desafio de Relatórios</a>
+                <a href="#training-games" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 nav-link-mobile">Jogos de Treinamento</a>
+                <a href="#simulator" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 nav-link-mobile">Simulador</a>
+                <a href="#ranking" class="block py-3 px-6 text-gray-700 hover:bg-gray-50 nav-link-mobile">Ranking</a>
+                <button id="mobile-logout-btn" class="hidden w-full text-left py-3 px-6 text-red-600 hover:bg-red-50 font-semibold">Sair</button>
+            </div>
+        </header>
+
+        <main id="main-content" class="flex-grow container mx-auto px-6 py-8 md:py-12">
+            <div id="dashboard-view" class="view"></div>
+            <div id="training-view" class="view hidden"></div>
+            <div id="flashcards-view" class="view hidden"></div>
+            <div id="advanced-indicators-view" class="view hidden"></div>
+            <div id="report-challenge-view" class="view hidden"></div>
+            <div id="training-games-view" class="view hidden"></div>
+            <div id="simulator-view" class="view hidden"></div>
+            <div id="ranking-view" class="view hidden"></div>
+        </main>
+
+        <footer class="bg-gray-100 border-t border-gray-200">
+            <div class="container mx-auto px-6 py-8 text-center text-gray-500">
+                <p>&copy; 2025 Academia Control Desk. Todos os direitos reservados.</p>
+                <p class="text-sm mt-2">Uma plataforma de treinamento para capacitar equipes de alta performance.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
