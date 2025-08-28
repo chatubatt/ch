@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendador Inteligente de Férias</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <header>
+        <h1 class="main-header">📅 Agendador Inteligente de Férias</h1>
+        <h3>*Sistema automatizado para distribuição inteligente de férias por centro de custo e cargo com garantia de 100% da planilha*</h3>
+    </header>
+
+    <main>
+        <section id="guide">
+            <h2>📋 GUIA DE USO RÁPIDO</h2>
+            <div class="guide-content">
+                <div>
+                    <h4>📁 ESTRUTURA DO ARQUIVO EXCEL:</h4>
+                    <ul>
+                        <li>✅ Mínimo 14 colunas (A até N)</li>
+                        <li>✅ Coluna C: Nome dos colaboradores</li>
+                        <li>✅ Coluna F: Centro de Custo (formato: 525 - Orb Atc - Sp Alexia Dayane)</li>
+                        <li>✅ Coluna G: Subcélula/Unidade</li>
+                        <li>✅ Coluna M: Data Limite (dd/mm/aaaa)</li>
+                        <li>✅ Coluna N: Cargo dos colaboradores</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>⚙️ COMO USAR:</h4>
+                    <ol>
+                        <li>Carregue o arquivo Excel</li>
+                        <li>Configure dias e percentual</li>
+                        <li>Selecione centros de custo e unidades</li>
+                        <li>Execute o cálculo</li>
+                        <li>Analise os resultados</li>
+                        <li>Exporte o cronograma</li>
+                    </ol>
+                    <h4>🚀 NOVO: DISTRIBUIÇÃO COMPLETA:</h4>
+                    <ul>
+                        <li>Sistema agora garante 100% da planilha</li>
+                        <li>Múltiplas tentativas automáticas</li>
+                        <li>Gráfico Real × Limite</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr>
+
+        <section id="upload-section">
+            <h2>📁 PASSO 1: Arquivo</h2>
+            <p class="info">💡 Carregue o arquivo Excel com os dados dos colaboradores</p>
+            <input type="file" id="excelFile" accept=".xlsx">
+            <div id="fileStatus"></div>
+        </section>
+
+        <hr>
+
+        <section id="parameters-section">
+            <h2>⚙️ PASSO 2: Parâmetros</h2>
+            <p class="info">💡 Configure os parâmetros de distribuição</p>
+            <div>
+                <label for="diasFerias">Dias de Férias:</label>
+                <input type="number" id="diasFerias" min="1" max="60" value="30">
+                <p class="help">Quantidade de dias consecutivos de férias para cada colaborador</p>
+            </div>
+            <div>
+                <label for="percentualSimultaneo">Percentual Máximo Simultâneo (%):</label>
+                <input type="range" id="percentualSimultaneo" min="1" max="100" value="20">
+                <span id="percentualValue">20%</span>
+                <p class="help">Percentual máximo de colaboradores da mesma unidade que podem estar de férias simultaneamente</p>
+                <p class="caption" id="percentualCaption"></p>
+            </div>
+            <div>
+                <label for="dataInicial">Data Início da Distribuição:</label>
+                <input type="date" id="dataInicial">
+                <p class="help">Data a partir da qual as férias começarão a ser distribuídas</p>
+            </div>
+        </section>
+
+        <hr>
+
+        <section id="selection-section">
+            <h2>🎯 PASSO 3: Seleção</h2>
+            <p class="info">💡 Por padrão, TODOS os centros de custo e unidades estão selecionados para garantir 100% da planilha</p>
+            
+            <div>
+                <label for="celulasCusto">Centros de Custo:</label>
+                <select id="celulasCusto" multiple></select>
+                <p class="help">Todos os centros de custo estão selecionados por padrão para processar a planilha completa</p>
+                <div id="celulasCustoStats"></div>
+            </div>
+            <div>
+                <label for="subcelulasUnidades">Subcélulas/Unidades:</label>
+                <select id="subcelulasUnidades" multiple></select>
+                <p class="help">Todas as unidades estão selecionadas por padrão para processar a planilha completa</p>
+            </div>
+        </section>
+
+        <hr>
+
+        <button id="processButton">🚀 PROCESSAR DISTRIBUIÇÃO DE FÉRIAS</button>
+
+        <hr>
+
+        <section id="analysis-section">
+            <h2>🔍 Análise de Datas Limite</h2>
+            <p class="info">💡 Analise a distribuição das datas limite dos colaboradores para planejar melhor</p>
+            <details>
+                <summary>Ver Análise de Datas Limite</summary>
+                <div>
+                    <label for="analiseCelulas">Filtrar Centros de Custo para Análise:</label>
+                    <select id="analiseCelulas" multiple></select>
+                </div>
+                <div>
+                    <label for="analiseUnidades">Filtrar Unidades para Análise:</label>
+                    <select id="analiseUnidades" multiple></select>
+                </div>
+                <div id="analysisResults"></div>
+            </details>
+        </section>
+
+        <hr>
+
+        <section id="simulation-stats">
+            <h2>📊 Estatísticas da Simulação Completa</h2>
+            <div id="statsMetrics"></div>
+            <div id="successRate"></div>
+        </section>
+
+        <hr>
+
+        <section id="visualizations">
+            <h2>📈 Visualizações da Distribuição</h2>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="tab1">📊 Por Unidade</button>
+                <button class="tab-button" data-tab="tab2">👔 Por Cargo</button>
+                <button class="tab-button" data-tab="tab3">📈 Real × Limite</button>
+            </div>
+            <div id="tab1" class="tab-content active"></div>
+            <div id="tab2" class="tab-content"></div>
+            <div id="tab3" class="tab-content"></div>
+        </section>
+
+        <hr>
+
+        <section id="cronograma">
+            <h2>📅 Cronograma de Férias</h2>
+            <div id="cronogramaFilters"></div>
+            <div id="cronogramaTable"></div>
+            <div id="cronogramaInfo"></div>
+        </section>
+
+        <hr>
+
+        <section id="exceptions">
+            <h2>⚠️ Relatório de Exceções</h2>
+            <div id="exceptionsTable"></div>
+            <div id="exceptionsMotives"></div>
+        </section>
+
+        <hr>
+
+        <section id="pending-employees">
+            <h2>🔍 Colaboradores Sem Agendamento</h2>
+            <div id="pendingEmployeesTable"></div>
+        </section>
+
+        <hr>
+
+        <section id="export-cronograma">
+            <h2>💾 Exportar Cronograma</h2>
+            <button id="exportButton">📥 BAIXAR CRONOGRAMA DE FÉRIAS (Excel)</button>
+        </section>
+
+        <hr>
+
+        <section id="features">
+            <h2>✨ Novidades e Funcionalidades</h2>
+            <div class="feature-columns">
+                <div>
+                    <h4>🏢 Processamento de Centro de Custo:</h4>
+                    <ul>
+                        <li>Extrai código e descrição</li>
+                        <li>Extrai categoria principal para agrupamento</li>
+                        <li>Mantém rastreabilidade completa</li>
+                        <li>Análises visuais por centro de custo</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>👔 Distribuição por Cargo:</h4>
+                    <ul>
+                        <li>Evita ausência simultânea de gestores</li>
+                        <li>Intervalos maiores entre cargos críticos</li>
+                        <li>Alertas automáticos para situações especiais</li>
+                        <li>Relatórios hierárquicos detalhados</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>🚀 Distribuição Completa:</h4>
+                    <ul>
+                        <li>Garante processamento de 100% da planilha</li>
+                        <li>Múltiplas tentativas automáticas</li>
+                        <li>Gráfico Real × Limite</li>
+                        <li>Relatório de conformidade</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="script/script.js"></script>
+</body>
+</html>
+
+
