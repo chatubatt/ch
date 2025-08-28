@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let originalData = null;
     let processedData = null;
 
-    // --- Lógica de Negócio (Portado de Python) ---
+    // --- Lógica de Negócio ---
 
     const FERIADOS = [
         '2025-01-01', '2025-03-03', '2025-03-04', '2025-04-18', '2025-04-21',
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function ehDiaUtil(d) {
         const day = d.getUTCDay();
         const isWeekend = (day === 0 || day === 6);
-        const isHoliday = FERIADOS.includes(d.setUTCHours(0, 0, 0, 0));
+        const isHoliday = FERIADOS.includes(new Date(d).setUTCHours(0, 0, 0, 0));
         return !isWeekend && !isHoliday;
     }
 
@@ -130,7 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     CelulaCentral: celulaCentral,
                     Unidade: unidade,
                     DataLimite: dataLimite,
-                    Cargo: cargo
+                    Cargo: cargo,
+                    Motivo: null
                 };
             }).filter(row => row.Nome && row.CelulaCentral && row.CelulaCentral !== 'Outros' && row.Unidade && row.DataLimite);
             
@@ -153,12 +154,11 @@ document.addEventListener("DOMContentLoaded", () => {
         subcelulasUnidades.innerHTML = unidades.map(u => `<option value="${u}" selected>${u}</option>`).join('');
     }
 
-    // --- ALGORITMO PRINCIPAL COM O NOVO RACIONAL ---
+    // --- ALGORITMO PRINCIPAL OTIMIZADO (V4) ---
 
-    function processarComMetaMensal() {
+    function processarFeriasFinal() {
         if (!originalData) return;
 
-        // 1. Obter parâmetros da interface
         const dias = parseInt(diasFerias.value, 10);
         const percentual = parseFloat(percentualSimultaneo.value) / 100;
         const inicioParts = dataInicial.value.split('-');
@@ -179,99 +179,96 @@ document.addEventListener("DOMContentLoaded", () => {
             row.NivelHierarquico = classificarHierarquiaCargo(row.Cargo);
         });
 
-        // 2. Análise do Período e Cálculo da Meta Mensal
-        const datasLimite = df.map(r => r.DataLimite);
-        const dataLimiteMaxima = new Date(Math.max.apply(null, datasLimite));
+        let dataDisponivelGlobal = new Date(dataDeInicioGlobal);
+        let loteGlobal = 1;
+        const unidades = [...new Set(df.map(r => r.Unidade))].sort();
 
-        const mesesTotais = (dataLimiteMaxima.getUTCFullYear() - dataDeInicioGlobal.getUTCFullYear()) * 12 +
-                            (dataLimiteMaxima.getUTCMonth() - dataDeInicioGlobal.getUTCMonth()) + 1;
-        
-        const metaMensal = Math.ceil(df.length / Math.max(1, mesesTotais));
+        for (const unidade of unidades) {
+            const dfUnidade = df.filter(f => f.Unidade === unidade);
+            if (dfUnidade.length === 0) continue;
 
-        // 3. Priorização por Urgência (Data Limite)
-        df.sort((a, b) => a.DataLimite - b.DataLimite);
-
-        // 4. Distribuição Mês a Mês
-        let agendamentos = [];
-        let dataAtual = new Date(dataDeInicioGlobal);
-
-        for (const funcionario of df) {
-            let agendado = false;
-            let tentativasMes = 0;
+            const resultadoUnidade = agendarUnidade(dfUnidade, dias, percentual, dataDisponivelGlobal, loteGlobal);
             
-            // Tenta agendar o funcionário no primeiro mês possível
-            while (!agendado && tentativasMes < 24) { // Limite para evitar loop infinito
-                
-                const agendadosNoMes = agendamentos.filter(ag => 
-                    ag.DataInicioFerias.getUTCFullYear() === dataAtual.getUTCFullYear() &&
-                    ag.DataInicioFerias.getUTCMonth() === dataAtual.getUTCMonth()
-                );
-
-                if (agendadosNoMes.length < metaMensal) {
-                    // Tenta encontrar um slot neste mês
-                    let dataDeBusca = new Date(dataAtual);
-                    let slotEncontrado = false;
-                    
-                    while (!slotEncontrado) {
-                        let dataInicioProposta = proximoDiaUtil(new Date(dataDeBusca));
-                        
-                        // Garante que não estamos pulando para o próximo mês
-                        if (dataInicioProposta.getUTCMonth() !== dataAtual.getUTCMonth()) {
-                            break; // Não há mais espaço neste mês, sai para tentar o próximo
-                        }
-                        
-                        const dataFimProposta = gerarDataFim(dataInicioProposta, dias);
-                        
-                        // Verifica se a data é válida (não passa da DataLimite)
-                        if (dataInicioProposta > funcionario.DataLimite) {
-                             break; // Impossível agendar, desiste para este funcionário
-                        }
-                        
-                        // Verifica conflitos de simultaneidade na unidade/cargo
-                        const agendadosNaUnidade = agendamentos.filter(ag => ag.Unidade === funcionario.Unidade);
-                        
-                        const limiteSimultaneo = Math.max(1, Math.floor(
-                            originalData.filter(o => o.Unidade === funcionario.Unidade).length * percentual
-                        ));
-                        
-                        let conflitos = 0;
-                        for (const ag of agendadosNaUnidade) {
-                            // Verifica se há sobreposição de datas
-                            if (Math.max(ag.DataInicioFerias, dataInicioProposta) <= Math.min(ag.DataFimFerias, dataFimProposta)) {
-                                conflitos++;
-                            }
-                        }
-
-                        if (conflitos < limiteSimultaneo) {
-                            // Slot encontrado!
-                            funcionario.DataInicioFerias = dataInicioProposta;
-                            funcionario.DataFimFerias = dataFimProposta;
-                            agendamentos.push(funcionario);
-                            agendado = true;
-                            slotEncontrado = true;
-                        } else {
-                            // Conflito, avança um dia e tenta de novo
-                            dataDeBusca.setUTCDate(dataDeBusca.getUTCDate() + 1);
-                        }
-                    }
-                }
-                
-                if (!agendado) {
-                    // Mês cheio ou sem slot, avança para o próximo mês
-                    dataAtual.setUTCMonth(dataAtual.getUTCMonth() + 1, 1);
-                    tentativasMes++;
-                }
-            }
+            dataDisponivelGlobal = resultadoUnidade.ultimaDataUsada;
+            loteGlobal = resultadoUnidade.ultimoLote;
         }
         
         processedData = df;
-        updateUIWithResults(df, percentual, 1);
+        updateUIWithResults(df, percentual);
+    }
+
+    function agendarUnidade(dfUnidade, dias, percentual, dataInicioUnidade, loteInicio) {
+        const datasLimiteUnidade = dfUnidade.map(r => r.DataLimite);
+        const dataLimiteMaximaUnidade = new Date(Math.max.apply(null, datasLimiteUnidade));
+        
+        const mesesTotaisUnidade = (dataLimiteMaximaUnidade.getUTCFullYear() - dataInicioUnidade.getUTCFullYear()) * 12 +
+                                   (dataLimiteMaximaUnidade.getUTCMonth() - dataInicioUnidade.getUTCMonth()) + 1;
+
+        const metaMensalUnidade = Math.ceil(dfUnidade.length / Math.max(1, mesesTotaisUnidade));
+        
+        dfUnidade.sort((a, b) => a.DataLimite - b.DataLimite);
+
+        let dataDisp = new Date(dataInicioUnidade);
+        let lote = loteInicio;
+        let agendamentosNestaUnidade = [];
+
+        for (const funcionario of dfUnidade) {
+            let mesCorrente = dataDisp.getUTCMonth();
+            let agendadosNoMes = agendamentosNestaUnidade.filter(ag => ag.DataInicioFerias.getUTCMonth() === mesCorrente).length;
+            
+            const prazoEstaCurto = (funcionario.DataLimite.getUTCFullYear() === dataDisp.getUTCFullYear() && 
+                                  funcionario.DataLimite.getUTCMonth() <= dataDisp.getUTCMonth() + 1);
+
+            if (agendadosNoMes >= metaMensalUnidade && !prazoEstaCurto) {
+                dataDisp.setUTCMonth(dataDisp.getUTCMonth() + 1, 1);
+            }
+
+            let slotEncontrado = false;
+            let tentativasBusca = 0;
+            while (!slotEncontrado && tentativasBusca < 365) { // Limite de busca de 1 ano
+                let dataInicioProposta = proximoDiaUtil(new Date(dataDisp));
+
+                if (dataInicioProposta > funcionario.DataLimite) {
+                    funcionario.Motivo = "Prazo Expirado durante a busca";
+                    break; 
+                }
+                
+                const dataFimProposta = gerarDataFim(dataInicioProposta, dias);
+                const limiteSimultaneo = Math.max(1, Math.floor(dfUnidade.length * percentual));
+                
+                const conflitos = agendamentosNestaUnidade.filter(ag => 
+                    Math.max(ag.DataInicioFerias, dataInicioProposta) <= Math.min(ag.DataFimFerias, dataFimProposta)
+                );
+
+                if (conflitos.length < limiteSimultaneo) {
+                    funcionario.DataInicioFerias = dataInicioProposta;
+                    funcionario.DataFimFerias = dataFimProposta;
+                    funcionario.Lote = lote;
+                    agendamentosNestaUnidade.push(funcionario);
+                    
+                    dataDisp = new Date(dataInicioProposta);
+                    dataDisp.setUTCDate(dataDisp.getUTCDate() + 1);
+                    
+                    lote++;
+                    slotEncontrado = true;
+                } else {
+                    // Resolução de Conflito Inteligente: Pula para o fim do bloqueio
+                    const maxFimConflito = new Date(Math.max.apply(null, conflitos.map(c => c.DataFimFerias)));
+                    dataDisp = new Date(maxFimConflito);
+                    dataDisp.setUTCDate(dataDisp.getUTCDate() + 1);
+                }
+                tentativasBusca++;
+            }
+            if(!slotEncontrado && !funcionario.Motivo) {
+                 funcionario.Motivo = "Não foi encontrado slot válido em 1 ano de busca";
+            }
+        }
+        return { ultimaDataUsada: dataDisp, ultimoLote: lote };
     }
     
-    
-    // --- Funções de Atualização da UI e Visualização ---
+    // --- Funções de UI e Visualização ---
 
-    function updateUIWithResults(data, percentual, tentativas) {
+    function updateUIWithResults(data, percentual) {
         initialMessage.style.display = 'none';
         resultsSection.style.display = 'block';
 
@@ -282,7 +279,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div><p>Total Processado</p><h3>${data.length}</h3></div>
             <div><p>✅ Com Férias</p><h3>${agendados.length}</h3></div>
             <div><p>⚠️ Pendentes</p><h3>${ignorados.length}</h3></div>
-            <div><p>📊 Racional</p><h3>Meta Mensal</h3></div>
+            <div><p>📊 Racional</p><h3>Meta Flexível</h3></div>
         `;
         const taxaSucesso = data.length > 0 ? (agendados.length / data.length) * 100 : 0;
         successRate.innerHTML = `<progress value="${taxaSucesso}" max="100" style="width: 100%;"></progress> <p style="text-align:center;">Taxa de Sucesso: ${taxaSucesso.toFixed(1)}%</p>`;
@@ -294,10 +291,14 @@ document.addEventListener("DOMContentLoaded", () => {
     
     function updateVisualizations(data, percentual) {
         const agendados = data.filter(r => r.DataInicioFerias);
-        if (agendados.length === 0) return;
+        if (agendados.length === 0) {
+            document.getElementById('tab1').innerHTML = "<p>Nenhum dado para exibir.</p>";
+            document.getElementById('tab2').innerHTML = "<p>Nenhum dado para exibir.</p>";
+            document.getElementById('tab3').innerHTML = "<p>Nenhum dado para exibir.</p>";
+            return;
+        }
         
         const getPeriodo = (dStr) => { const date = new Date(dStr); return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`; };
-        
         const periodos = [...new Set(agendados.map(r => getPeriodo(r.DataInicioFerias)))].sort();
         
         const dadosPorUnidade = groupBy(agendados, 'Unidade');
@@ -328,7 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateCronograma(data) {
         const formatarData = (dStr) => dStr ? new Date(dStr).toLocaleDateString("pt-BR", { timeZone: 'UTC' }) : "---";
-        const colunas = ["Nome", "CentroCustoCompleto", "Unidade", "Cargo", "DataLimite", "DataInicioFerias", "DataFimFerias"];
+        const colunas = ["Nome", "CentroCustoCompleto", "Unidade", "Cargo", "DataLimite", "DataInicioFerias", "DataFimFerias", "Lote"];
         let tableHtml = `<table><thead><tr>${colunas.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>`;
         
         const sortedData = [...data].sort((a,b) => (a.DataInicioFerias ? new Date(a.DataInicioFerias) : new Date('2999-12-31')) - (b.DataInicioFerias ? new Date(b.DataInicioFerias) : new Date('2999-12-31')));
@@ -342,6 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${formatarData(row.DataLimite)}</td>
                 <td>${formatarData(row.DataInicioFerias)}</td>
                 <td>${formatarData(row.DataFimFerias)}</td>
+                <td>${row.Lote || '---'}</td>
             </tr>`;
         });
         cronogramaTable.innerHTML = tableHtml + "</tbody></table>";
@@ -354,7 +356,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         exceptionsSection.style.display = 'block';
-        const colunas = ["Nome", "Unidade", "Cargo", "DataLimite"];
+        const colunas = ["Nome", "Unidade", "Cargo", "DataLimite", "Motivo"]; // Adicionada coluna Motivo
         let tableHtml = `<table><thead><tr>${colunas.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>`;
         ignorados.forEach(row => {
              tableHtml += `<tr>
@@ -362,10 +364,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${row.Unidade || ''}</td>
                 <td>${row.Cargo || 'N/A'}</td>
                 <td>${row.DataLimite ? new Date(row.DataLimite).toLocaleDateString("pt-BR", { timeZone: 'UTC' }) : 'N/A'}</td>
+                <td>${row.Motivo || 'Não especificado'}</td>
             </tr>`;
         });
         exceptionsTable.innerHTML = tableHtml + "</tbody></table>";
-        exceptionsMotives.innerHTML = `<p class="info"><strong>Motivo:</strong> Não foi possível alocar estes <strong>${ignorados.length}</strong> colaboradores. Isso ocorre se a data de início calculada for posterior à data limite do colaborador.</p>`;
+        const motivosContagem = countBy(ignorados.filter(i => i.Motivo), 'Motivo');
+        exceptionsMotives.innerHTML = "<p><strong>Principais Motivos da Falha:</strong></p>" + Object.entries(motivosContagem).map(([motivo, count]) => `<li>${motivo}: ${count}</li>`).join('');
     }
 
     function exportData() {
@@ -402,7 +406,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Event Listeners ---
     percentualSimultaneo.addEventListener("input", updatePercentualUI);
     excelFile.addEventListener("change", handleFileUpload);
-    processButton.addEventListener("click", processarComMetaMensal); // <--- MUDANÇA IMPORTANTE
+    processButton.addEventListener("click", processarFeriasFinal);
     exportButton.addEventListener("click", exportData);
     tabButtons.forEach(button => {
         button.addEventListener("click", () => {
