@@ -113,7 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             
             df = df.map(row => {
-                // Adiciona verificação para garantir que as colunas existem antes de acessá-las
                 const nome = headers.length > 2 ? row[headers[2]] : null;
                 const centroCustoCompleto = headers.length > 5 ? row[headers[5]] : null;
                 const unidade = headers.length > 6 ? row[headers[6]] : null;
@@ -179,11 +178,14 @@ document.addEventListener("DOMContentLoaded", () => {
         let tentativas = 0;
         const maxTentativas = 3;
         let percentualAtual = percentual;
-        
+        let dataDisponivelGlobal = new Date(inicio);
+        let loteGlobal = 1;
+
         while (tentativas < maxTentativas) {
             let pendentes = dfResultadoFinal.filter(row => !row.DataInicioFerias);
             if (pendentes.length === 0) break;
             
+            // Ordenação de prioridade principal
             pendentes.sort((a, b) => 
                 (a.Unidade || "").localeCompare(b.Unidade || "") ||
                 a.NivelHierarquico - b.NivelHierarquico ||
@@ -191,9 +193,15 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             
             let dataInicialTentativa = new Date(inicio);
-            dataInicialTentativa.setDate(dataInicialTentativa.getDate() + (tentativas * 45));
-            
-            processarLote(pendentes, dias, percentualAtual, dataInicialTentativa);
+            if (tentativas > 0) {
+                 dataInicialTentativa.setDate(dataInicialTentativa.getDate() + (tentativas * 45));
+            }
+            // Garante que a nova tentativa não comece antes do fim da última leva agendada
+            const dataDePartida = dataDisponivelGlobal > dataInicialTentativa ? dataDisponivelGlobal : dataInicialTentativa;
+
+            const resultadoLote = distribuirFerias(pendentes, dias, percentualAtual, dataDePartida, loteGlobal);
+            dataDisponivelGlobal = resultadoLote.ultimaData; // Atualiza a data global para a próxima tentativa
+            loteGlobal = resultadoLote.ultimoLote;
 
             percentualAtual = Math.min(1.0, percentualAtual + 0.15);
             tentativas++;
@@ -202,29 +210,35 @@ document.addEventListener("DOMContentLoaded", () => {
         processedData = dfResultadoFinal;
         updateUIWithResults(processedData, percentual, tentativas);
     }
-    
-    function processarLote(df, dias, percentual, data_inicial) {
+
+    /**
+     * **FUNÇÃO COM LÓGICA CORRIGIDA**
+     * Processa um DataFrame de colaboradores usando uma linha do tempo única.
+     */
+    function distribuirFerias(df, dias, percentual, data_inicial, lote_inicial) {
+        let data_disp = new Date(data_inicial);
+        let lote = lote_inicial;
         const unidades = [...new Set(df.map(row => row.Unidade))].sort();
-        let lote = 1;
-        
+
+        // A data_disp AGORA É ÚNICA e avança continuamente
         for (const unidade of unidades) {
             const df_unidade = df.filter(row => row.Unidade === unidade);
             if (df_unidade.length === 0) continue;
             
-            let data_disp = new Date(data_inicial);
-            
             const niveis = [...new Set(df_unidade.map(r => r.NivelHierarquico))].sort();
             for (const nivel of niveis) {
                 const df_nivel = df_unidade.filter(r => r.NivelHierarquico === nivel);
-                const cargos = [...new Set(df_nivel.map(r => r.Cargo))].sort();
+                const cargos = [...new Set(df_nivel.map(r => r.Cargo || 'N/A'))].sort();
                 
                 for (const cargo of cargos) {
-                    const grupo = df_nivel.filter(r => r.Cargo === cargo);
+                    const grupo = df_nivel.filter(r => (r.Cargo || 'N/A') === cargo);
                     if (grupo.length === 0) continue;
 
                     const limite_cargo = calcularLimitePorCargo(df_unidade, cargo, percentual);
                     for (let i = 0; i < grupo.length; i += limite_cargo) {
                         const lote_atual = grupo.slice(i, i + limite_cargo);
+                        
+                        // Encontra a próxima data útil para iniciar este lote
                         const ini = proximoDiaUtil(new Date(data_disp));
                         let fim_lote = null;
 
@@ -238,8 +252,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             row.Lote = lote;
                             fim_lote = !fim_lote || fim > fim_lote ? fim : fim_lote;
                         }
+
                         if (fim_lote) {
-                            const intervalo_dias = nivel <= 2 ? 7 : 1;
+                            const intervalo_dias = nivel <= 2 ? 7 : 1; // Intervalo maior para gestores
                             data_disp = new Date(fim_lote);
                             data_disp.setDate(data_disp.getDate() + intervalo_dias);
                             lote++;
@@ -248,8 +263,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         }
+        return { ultimaData: data_disp, ultimoLote: lote };
     }
     
+    // --- Funções de Atualização da UI e Visualização (sem alterações) ---
+
     function updateUIWithResults(data, percentual, tentativas) {
         initialMessage.style.display = 'none';
         resultsSection.style.display = 'block';
@@ -318,6 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const formatarData = (d) => d ? new Date(d).toLocaleDateString("pt-BR") : "---";
         const colunas = ["Nome", "CentroCustoCompleto", "Unidade", "Cargo", "DataLimite", "DataInicioFerias", "DataFimFerias", "Lote"];
         let tableHtml = `<table><thead><tr>${colunas.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+        data.sort((a,b) => (a.DataInicioFerias || new Date('2999-12-31')) - (b.DataInicioFerias || new Date('2999-12-31')));
         data.forEach(row => {
             tableHtml += `<tr>
                 <td>${row.Nome || ''}</td>
@@ -331,7 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </tr>`;
         });
         cronogramaTable.innerHTML = tableHtml + "</tbody></table>";
-        cronogramaInfo.innerHTML = `<p>Exibindo ${data.length} registros.</p>`;
+        cronogramaInfo.innerHTML = `<p>Exibindo ${data.length} registros ordenados por data de início.</p>`;
     }
 
     function updateExceptions(ignorados) {
