@@ -1,112 +1,87 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendador Inteligente de Férias</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <aside class="sidebar">
-            <h2>⚙️ CONFIGURAÇÕES</h2>
-            
-            <section class="widget">
-                <h3>📁 PASSO 1: Arquivo</h3>
-                <p class="info">Carregue o arquivo Excel com os dados dos colaboradores.</p>
-                <input type="file" id="excelFile" accept=".xlsx, .xls">
-                <div id="fileStatus"></div>
-            </section>
-
-            <section class="widget">
-                <h3>⚙️ PASSO 2: Parâmetros</h3>
-                <div>
-                    <label for="diasFerias">Dias de Férias:</label>
-                    <input type="number" id="diasFerias" min="1" max="60" value="30">
-                </div>
-                <div>
-                    <label for="percentualSimultaneo">Percentual Máximo Simultâneo:</label>
-                    <div class="range-container">
-                        <input type="range" id="percentualSimultaneo" min="1" max="100" value="20">
-                        <span id="percentualValue">20%</span>
-                    </div>
-                    <p class="caption" id="percentualCaption"></p>
-                </div>
-                <div>
-                    <label for="dataInicial">Data Início da Distribuição:</label>
-                    <input type="date" id="dataInicial">
-                </div>
-            </section>
-
-            <section class="widget">
-                <h3>🎯 PASSO 3: Seleção</h3>
-                <div>
-                    <label for="celulasCusto">Centros de Custo:</label>
-                    <select id="celulasCusto" multiple></select>
-                </div>
-                <div>
-                    <label for="subcelulasUnidades">Subcélulas/Unidades:</label>
-                    <select id="subcelulasUnidades" multiple></select>
-                </div>
-            </section>
-
-            <button id="processButton" disabled>🚀 CALCULAR DISTRIBUIÇÃO COMPLETA</button>
-        </aside>
-
-        <main class="main-content">
-            <header>
-                <h1>📅 Agendador Inteligente de Férias</h1>
-                <h3>Sistema automatizado para distribuição inteligente de férias com garantia de 100% da planilha</h3>
-            </header>
-
-            <section id="results-section" class="widget" style="display: none;">
-                <h2>📊 Estatísticas da Simulação Completa</h2>
-                <div id="statsMetrics"></div>
-                <div id="successRate"></div>
-                
-                <h2>📈 Visualizações da Distribuição</h2>
-                <div class="tabs">
-                    <button class="tab-button active" data-tab="tab1">📊 Por Unidade</button>
-                    <button class="tab-button" data-tab="tab2">👔 Por Cargo</button>
-                    <button class="tab-button" data-tab="tab3">📈 Real × Limite</button>
-                </div>
-                <div class="tab-content-wrapper">
-                    <div id="tab1" class="tab-content active"></div>
-                    <div id="tab2" class="tab-content"></div>
-                    <div id="tab3" class="tab-content"></div>
-                </div>
-
-                <h2>📅 Cronograma de Férias</h2>
-                <div id="cronogramaTable"></div>
-                <div id="cronogramaInfo"></div>
-
-                <div id="exceptions-section" style="display: none;">
-                    <h2>🔍 Colaboradores Sem Agendamento</h2>
-                    <div id="exceptionsTable"></div>
-                    <div id="exceptionsMotives"></div>
-                </div>
-                
-                <h2>💾 Exportar Resultados</h2>
-                <button id="exportButton">📥 BAIXAR CRONOGRAMA COMPLETO (Excel)</button>
-            </section>
-
-            <section id="initial-message" class="widget">
-                <h2>Bem-vindo!</h2>
-                <p class="info">👈 Para começar, carregue um arquivo Excel na barra lateral esquerda.</p>
-                <h4>📋 Estrutura Esperada do Arquivo:</h4>
-                <ul>
-                    <li>✅ **Coluna C:** Nome</li>
-                    <li>✅ **Coluna F:** Centro de Custo (Ex: `525 - Orb Atc - Sp Alexia Dayane`)</li>
-                    <li>✅ **Coluna G:** Unidade / Subcélula</li>
-                    <li>✅ **Coluna M:** Data Limite para gozo das férias</li>
-                    <li>✅ **Coluna N:** Cargo do colaborador</li>
-                </ul>
-            </section>
-        </main>
+<section class="analise-widget">
+    <div class="widget-header">
+        <span class="widget-icon">📅</span>
+        <h2>Análise de Datas Limite por Unidade</h2>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+    <details class="analise-detalhada" open>
+        <summary>
+            <div class="summary-content">
+                <span class="summary-icon">🔍</span>
+                Ver análise detalhada das datas limite
+            </div>
+            <span class="summary-chevron"></span>
+        </summary>
+        
+        <div class="filters-container">
+            <div class="filter-group">
+                <label for="filtro-centro-custo">Filtrar Centros de Custo para Análise:</label>
+                <div class="tags-input-container">
+                    <span class="tag">Pre Vendas <button class="remove-tag">&times;</button></span>
+                    <span class="tag">Qualidade <button class="remove-tag">&times;</button></span>
+                    <span class="tag">Raquel Pontes <button class="remove-tag">&times;</button></span>
+                    <span class="tag">Richardson Tordin <button class="remove-tag">&times;</button></span>
+                    <span class="tag">Saude <button class="remove-tag">&times;</button></span>
+                    <span class="tag">Sp <button class="remove-tag">&times;</button></span>
+                    <span class="tag">TI Field <button class="remove-tag">&times;</button></span>
+                    <span class="tag">Vanessa Modesto <button class="remove-tag">&times;</button></span>
+                    <span class="tag">Vp Rodrigo Bibia... <button class="remove-tag">&times;</button></span>
+                </div>
+            </div>
+            <div class="filter-group">
+                <label for="filtro-unidades">Filtrar Unidades para Análise:</label>
+                <div class="tags-input-container">
+                    <span class="tag">1048 - Banco De... <button class="remove-tag">&times;</button></span>
+                    <span class="tag">11743 - Zema Cr... <button class="remove-tag">&times;</button></span>
+                    <span class="tag">12034 - Riopar P... <button class="remove-tag">&times;</button></span>
+                    <span class="tag">14942 - Compan... <button class="remove-tag">&times;</button></span>
+                    <span class="tag">1535 - Agencia N... <button class="remove-tag">&times;</button></span>
+                    <span class="tag">1591 - Banco Me... <button class="remove-tag">&times;</button></span>
+                    <span class="tag">1844 - Cielo S.A. <button class="remove-tag">&times;</button></span>
+                    <span class="tag">1920 - Banco Bra... <button class="remove-tag">&times;</button></span>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <div class="resumo-geral">
+        <div class="widget-header">
+            <span class="widget-icon">📊</span>
+            <h3>Resumo Geral</h3>
+        </div>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">🏢</span>
+                    <span class="metric-label">Unidades Analisadas</span>
+                    <span class="tooltip" title="Número total de unidades únicas nos filtros selecionados">?</span>
+                </div>
+                <div class="metric-value">38</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">👥</span>
+                    <span class="metric-label">Total Colaboradores</span>
+                     <span class="tooltip" title="Número total de colaboradores nos filtros selecionados">?</span>
+                </div>
+                <div class="metric-value">4222</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">⏰</span>
+                    <span class="metric-label">Data Mais Próxima</span>
+                     <span class="tooltip" title="A data limite mais antiga encontrada entre os colaboradores selecionados">?</span>
+                </div>
+                <div class="metric-value">12/09/2024</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-header">
+                    <span class="metric-icon">📆</span>
+                    <span class="metric-label">Data Mais Distante</span>
+                     <span class="tooltip" title="A data limite mais futura encontrada entre os colaboradores selecionados">?</span>
+                </div>
+                <div class="metric-value">11/04/2028</div>
+            </div>
+        </div>
+    </div>
+</section>
