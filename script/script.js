@@ -19,9 +19,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const exportButton = document.getElementById("exportButton");
     const cronogramaTable = document.getElementById("cronogramaTable");
     const cronogramaInfo = document.getElementById("cronogramaInfo");
-    const exceptionsTable = document.getElementById("exceptionsTable");
-    const exceptionsMotives = document.getElementById("exceptionsMotives");
     const analysisResults = document.getElementById("analysisResults");
+    const analiseCelulas = document.getElementById("analiseCelulas");
+    const analiseUnidades = document.getElementById("analiseUnidades");
+    // Seletor corrigido para a tabela de colaboradores pendentes
+    const pendingEmployeesTable = document.getElementById("pendingEmployeesTable");
 
 
     let originalData = null; // Armazena os dados originais do Excel, limpos
@@ -130,6 +132,9 @@ document.addEventListener("DOMContentLoaded", () => {
     excelFile.addEventListener("change", handleFileUpload);
     processButton.addEventListener("click", processVacationData);
     exportButton.addEventListener("click", exportData);
+    
+    analiseCelulas.addEventListener("change", updateAnalysisCharts);
+    analiseUnidades.addEventListener("change", updateAnalysisCharts);
 
     tabButtons.forEach(button => {
         button.addEventListener("click", () => {
@@ -148,15 +153,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function parseExcelDate(dateValue) {
         if (typeof dateValue === 'number') {
-            // Converte data serial do Excel para data JS
             return new Date((dateValue - 25569) * 86400000);
         } else if (typeof dateValue === 'string') {
             const parts = dateValue.match(/(\d{1,2})[/-](\d{1,2})[/-](\d{4})/);
             if (parts) {
-                // Formato dd/mm/yyyy
                 return new Date(parts[3], parts[2] - 1, parts[1]);
             }
-            // Tenta formato padrão
             const parsed = new Date(dateValue);
             if (!isNaN(parsed)) return parsed;
         }
@@ -184,13 +186,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 return obj;
             });
             
-            // Mapeamento esperado das colunas
             const colMap = {
-                nome: headers[2],       // Coluna C
-                centroCusto: headers[5], // Coluna F
-                unidade: headers[6],     // Coluna G
-                dataLimite: headers[12], // Coluna M
-                cargo: headers[13]       // Coluna N
+                nome: headers[2],
+                centroCusto: headers[5],
+                unidade: headers[6],
+                dataLimite: headers[12],
+                cargo: headers[13]
             };
 
             const errors = [];
@@ -229,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             
             originalData = df;
-            processedData = null; // Reseta dados processados
+            processedData = null;
             const removidos = originalSize - df.length;
             fileStatus.textContent = `✅ ${df.length} colaboradores válidos carregados.`;
             if (removidos > 0) {
@@ -260,7 +261,20 @@ document.addEventListener("DOMContentLoaded", () => {
             const option = new Option(unidade, unidade, true, true);
             subcelulasUnidades.appendChild(option);
         });
+
+        analiseCelulas.innerHTML = "";
+        celulasDisponiveis.forEach(celula => {
+            const option = new Option(celula, celula);
+            analiseCelulas.appendChild(option);
+        });
+
+        analiseUnidades.innerHTML = "";
+        unidadesDisponiveis.forEach(unidade => {
+            const option = new Option(unidade, unidade);
+            analiseUnidades.appendChild(option);
+        });
     }
+
 
     // --- ALGORITMO PRINCIPAL DE DISTRIBUIÇÃO ---
 
@@ -399,11 +413,10 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             
             loteAtual = loteFinal;
-            percentualAtual = Math.min(1.0, percentualAtual + 0.1); // Aumenta 10%
+            percentualAtual = Math.min(1.0, percentualAtual + 0.1);
             tentativas++;
         }
 
-        // --- Pós-processamento e Atualização da UI ---
         processedData = dfResultadoFinal;
         
         const estatisticasFinais = {
@@ -421,7 +434,8 @@ document.addEventListener("DOMContentLoaded", () => {
         updateStats(estatisticasFinais);
         updateVisualizations(processedData, percentual);
         updateCronograma(processedData);
-        updateExceptions(ignoradosFinal);
+        updatePendingEmployees(ignoradosFinal); // Corrigido para chamar a função correta
+        updateAnalysisCharts();
 
         alert("Distribuição de férias concluída! Verifique os resultados nas seções abaixo.");
     }
@@ -461,7 +475,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Lógica de agrupamento para gráficos
         const agruparPorChave = (dados, chave, chaveData) => {
             return dados.reduce((acc, row) => {
                 const data = new Date(row[chaveData]);
@@ -482,7 +495,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return yA - yB || mA - mB;
         });
 
-        // Gráfico por Unidade
         const dadosPorUnidade = agruparPorChave(agendados, 'Unidade', 'DataInicioFerias');
         const tracesUnidade = Object.keys(dadosPorUnidade).map(unidade => ({
             x: todosPeriodos,
@@ -492,7 +504,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
         criarGrafico('tab1', tracesUnidade, { title: 'Distribuição de Férias por Unidade', barmode: 'stack', xaxis: {title: 'Mês/Ano'}, yaxis: {title: 'Nº Colaboradores'} });
 
-        // Gráfico por Cargo
         const dadosPorCargo = agruparPorChave(agendados.map(r => ({...r, NivelHierarquico: {1: "Alta Gestão", 2: "Média Gestão", 3: "Operacional"}[r.NivelHierarquico]})), 'NivelHierarquico', 'DataInicioFerias');
         const tracesCargo = Object.keys(dadosPorCargo).map(nivel => ({
             x: todosPeriodos,
@@ -502,7 +513,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }));
         criarGrafico('tab2', tracesCargo, { title: 'Distribuição por Nível Hierárquico', barmode: 'stack', xaxis: {title: 'Mês/Ano'}, yaxis: {title: 'Nº Colaboradores'} });
 
-        // Gráfico Real vs Limite
         const totalPorUnidade = data.reduce((acc, row) => ({...acc, [row.Unidade]: (acc[row.Unidade] || 0) + 1 }), {});
         const tracesRealLimite = [];
         Object.keys(dadosPorUnidade).forEach(unidade => {
@@ -523,23 +533,52 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
         criarGrafico('tab3', tracesRealLimite, { title: 'Real vs. Limite por Unidade', barmode: 'group', xaxis: {title: 'Mês/Ano'}, yaxis: {title: 'Nº Colaboradores'} });
+    }
+    
+    function updateAnalysisCharts() {
+        const dataToAnalyze = processedData || originalData;
+        if (!dataToAnalyze) return;
 
-        // Análise de Datas Limite
-        const { grafico } = criarAnaliseDatasLimite(data);
-        analysisResults.innerHTML = ''; // Limpa
+        const selectedAnaliseCelulas = Array.from(analiseCelulas.selectedOptions).map(opt => opt.value);
+        const selectedAnaliseUnidades = Array.from(analiseUnidades.selectedOptions).map(opt => opt.value);
+
+        let dataFiltrada = dataToAnalyze;
+
+        if (selectedAnaliseCelulas.length > 0) {
+            dataFiltrada = dataFiltrada.filter(r => selectedAnaliseCelulas.includes(r.CelulaCentral));
+        }
+        if (selectedAnaliseUnidades.length > 0) {
+            dataFiltrada = dataFiltrada.filter(r => selectedAnaliseUnidades.includes(r.Unidade));
+        }
+        
+        const { grafico } = criarAnaliseDatasLimite(dataFiltrada);
+        analysisResults.innerHTML = '';
         if(grafico){
             const divGrafico = document.createElement('div');
             analysisResults.appendChild(divGrafico);
             Plotly.newPlot(divGrafico, grafico.data, grafico.layout, { responsive: true });
+        } else {
+            analysisResults.innerHTML = '<p>Nenhum dado encontrado para os filtros selecionados.</p>';
         }
     }
-    
+
     function criarAnaliseDatasLimite(df) {
         if (!df || df.length === 0) return {grafico: null};
 
         const dfValido = df.filter(row => row.DataLimite);
         if (dfValido.length === 0) return {grafico: null};
         
+        const agruparPorChave = (dados, chave, chaveData) => {
+            return dados.reduce((acc, row) => {
+                const data = new Date(row[chaveData]);
+                const periodo = `${data.getMonth() + 1}/${data.getFullYear()}`;
+                const grupo = row[chave] || "N/A";
+                if (!acc[grupo]) acc[grupo] = {};
+                acc[grupo][periodo] = (acc[grupo][periodo] || 0) + 1;
+                return acc;
+            }, {});
+        };
+
         const analise = agruparPorChave(dfValido, 'Unidade', 'DataLimite');
         const todosPeriodos = [...new Set(dfValido.map(r => {
             const d = new Date(r.DataLimite);
@@ -578,7 +617,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const formatarData = (d) => d ? new Date(d).toLocaleDateString("pt-BR") : "---";
 
         let tableHtml = `<table><thead><tr>${colunas.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>`;
-        data.forEach(row => {
+        // Exibir apenas os agendados no cronograma principal
+        data.filter(row => row.DataInicioFerias).forEach(row => {
             tableHtml += `<tr>
                 <td>${row.Nome || ''}</td>
                 <td>${row.CentroCustoCompleto || ''}</td>
@@ -592,13 +632,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         tableHtml += "</tbody></table>";
         cronogramaTable.innerHTML = tableHtml;
-        cronogramaInfo.innerHTML = `<p>Exibindo ${data.length} registros.</p>`;
+        cronogramaInfo.innerHTML = `<p>Exibindo ${data.filter(row => row.DataInicioFerias).length} registros agendados.</p>`;
     }
-
-    function updateExceptions(ignored) {
+    
+    // Função corrigida para exibir os colaboradores não agendados
+    function updatePendingEmployees(ignored) {
         if (!ignored || ignored.length === 0) {
-            exceptionsTable.innerHTML = "<p>✅ Nenhuma exceção. Todos os colaboradores selecionados foram alocados.</p>";
-            exceptionsMotives.innerHTML = "";
+            pendingEmployeesTable.innerHTML = "<p>✅ Nenhuma exceção. Todos os colaboradores selecionados foram alocados.</p>";
             return;
         }
 
@@ -615,12 +655,13 @@ document.addEventListener("DOMContentLoaded", () => {
             </tr>`;
         });
         tableHtml += "</tbody></table>";
-        exceptionsTable.innerHTML = tableHtml;
 
         const motivos = ignored.reduce((acc, row) => ({...acc, [row.Motivo]: (acc[row.Motivo] || 0) + 1}), {});
-        exceptionsMotives.innerHTML = "<p><strong>Principais motivos:</strong></p><ul>" +
-            Object.entries(motivos).map(([motivo, count]) => `<li><strong>${motivo}:</strong> ${count}</li>`).join('') +
+        tableHtml += "<hr><p><strong>Principais motivos para não agendamento:</strong></p><ul>" +
+            Object.entries(motivos).map(([motivo, count]) => `<li><strong>${motivo}:</strong> ${count} colaborador(es)</li>`).join('') +
             "</ul>";
+
+        pendingEmployeesTable.innerHTML = tableHtml;
     }
 
     function exportData() {
