@@ -50,32 +50,30 @@
                 </div>
             </section>
 
-            <button id="processButton" disabled>🚀 PROCESSAR DISTRIBUIÇÃO</button>
+            <button id="processButton" disabled>🚀 CALCULAR DISTRIBUIÇÃO COMPLETA</button>
         </aside>
 
         <main class="main-content">
             <header>
                 <h1>📅 Agendador Inteligente de Férias</h1>
-                <h3>Sistema para distribuição inteligente de férias com garantia de 100% da planilha</h3>
+                <h3>Sistema automatizado para distribuição inteligente de férias com garantia de 100% da planilha</h3>
             </header>
 
             <section id="results-section" class="widget" style="display: none;">
-                <h2>📊 Estatísticas da Simulação</h2>
+                <h2>📊 Estatísticas da Simulação Completa</h2>
                 <div id="statsMetrics"></div>
                 <div id="successRate"></div>
                 
                 <h2>📈 Visualizações da Distribuição</h2>
                 <div class="tabs">
-                    <button class="tab-button active" data-tab="tab1">Por Unidade</button>
-                    <button class="tab-button" data-tab="tab2">Por Cargo</button>
-                    <button class="tab-button" data-tab="tab3">Real × Limite</button>
-                    <button class="tab-button" data-tab="tab4">Análise Datas Limite</button>
+                    <button class="tab-button active" data-tab="tab1">📊 Por Unidade</button>
+                    <button class="tab-button" data-tab="tab2">👔 Por Cargo</button>
+                    <button class="tab-button" data-tab="tab3">📈 Real × Limite</button>
                 </div>
                 <div class="tab-content-wrapper">
                     <div id="tab1" class="tab-content active"></div>
                     <div id="tab2" class="tab-content"></div>
                     <div id="tab3" class="tab-content"></div>
-                    <div id="tab4" class="tab-content"></div>
                 </div>
 
                 <h2>📅 Cronograma de Férias</h2>
@@ -88,8 +86,8 @@
                     <div id="exceptionsMotives"></div>
                 </div>
                 
-                <h2>💾 Exportar Cronograma</h2>
-                <button id="exportButton">📥 BAIXAR CRONOGRAMA (Excel)</button>
+                <h2>💾 Exportar Resultados</h2>
+                <button id="exportButton">📥 BAIXAR CRONOGRAMA COMPLETO (Excel)</button>
             </section>
 
             <section id="initial-message" class="widget">
@@ -98,10 +96,10 @@
                 <h4>📋 Estrutura Esperada do Arquivo:</h4>
                 <ul>
                     <li>✅ **Coluna C:** Nome</li>
-                    <li>✅ **Coluna F:** Centro de Custo</li>
-                    <li>✅ **Coluna G:** Unidade</li>
-                    <li>✅ **Coluna M:** Data Limite</li>
-                    <li>✅ **Coluna N:** Cargo</li>
+                    <li>✅ **Coluna F:** Centro de Custo (Ex: `525 - Orb Atc - Sp Alexia Dayane`)</li>
+                    <li>✅ **Coluna G:** Unidade / Subcélula</li>
+                    <li>✅ **Coluna M:** Data Limite para gozo das férias</li>
+                    <li>✅ **Coluna N:** Cargo do colaborador</li>
                 </ul>
             </section>
         </main>
