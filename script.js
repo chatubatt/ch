@@ -154,14 +154,14 @@ document.addEventListener("DOMContentLoaded", () => {
         subcelulasUnidades.innerHTML = unidades.map(u => `<option value="${u}" selected>${u}</option>`).join('');
     }
 
-    // --- ALGORITMO PRINCIPAL COM O RACIONAL GLOBAL (V5) ---
+    // --- ALGORITMO PRINCIPAL COM MÚLTIPLAS TENTATIVAS (V6) ---
 
-    function processarComMetaGlobal() {
+    function iniciarProcessamentoCompleto() {
         if (!originalData) return;
 
-        // 1. Obter parâmetros e filtrar dados
+        // 1. Obter parâmetros e preparar dados
         const dias = parseInt(diasFerias.value, 10);
-        const percentual = parseFloat(percentualSimultaneo.value) / 100;
+        const percentualInicial = parseFloat(percentualSimultaneo.value) / 100;
         const inicioParts = dataInicial.value.split('-');
         const dataDeInicioGlobal = new Date(Date.UTC(inicioParts[0], inicioParts[1] - 1, inicioParts[2]));
         
@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
             row.NivelHierarquico = classificarHierarquiaCargo(row.Cargo);
         });
 
-        // 2. Calcular Parâmetros Globais (lógica da "Cia de Gás")
+        // 2. PASSO 1: Tentativa de agendamento ideal e equilibrado
         const datasLimite = df.map(r => r.DataLimite);
         const dataLimiteMinima = new Date(Math.min.apply(null, datasLimite));
         const dataLimiteMaxima = new Date(Math.max.apply(null, datasLimite));
@@ -193,74 +193,96 @@ document.addEventListener("DOMContentLoaded", () => {
         const totalDias = (dataLimiteMaxima - dataLimiteMinima) / (1000 * 60 * 60 * 24);
         const totalMeses = Math.max(1, Math.round(totalDias / 31));
         const metaMensalGlobal = Math.ceil(df.length / totalMeses);
-
-        // 3. Priorizar por Urgência (Data Limite) e depois por Hierarquia
-        df.sort((a, b) => a.DataLimite - b.DataLimite || a.NivelHierarquico - b.NivelHierarquico);
         
-        // 4. Agendamento
-        let agendamentos = [];
-        let lote = 1;
-        const totaisPorUnidade = countBy(df, 'Unidade');
+        agendarLote(df, dias, percentualInicial, dataDeInicioGlobal, metaMensalGlobal, 1);
 
-        for (const funcionario of df) {
-            let dataDeBusca = new Date(dataDeInicioGlobal);
-            let slotEncontrado = false;
+        // 3. PASSOS SEGUINTES: Tentativas com regras flexibilizadas
+        let tentativas = 1;
+        const maxTentativas = 8; // Aumenta as chances de encaixar todos
+        let percentualAtual = percentualInicial;
+        
+        while(df.some(p => !p.DataInicioFerias) && tentativas < maxTentativas) {
+            tentativas++;
+            let pendentes = df.filter(p => !p.DataInicioFerias);
             
-            while (!slotEncontrado) {
+            // Flexibiliza as regras
+            percentualAtual = Math.min(1.0, percentualAtual + 0.1); // Aumenta 10%
+            
+            // Re-agenda APENAS os pendentes, sem meta mensal e com maior %
+            agendarLote(pendentes, dias, percentualAtual, dataDeInicioGlobal, Infinity, tentativas);
+        }
+        
+        processedData = df;
+        updateUIWithResults(df, percentualAtual, totalMeses, metaMensalGlobal, tentativas);
+    }
+    
+    function agendarLote(dfParaAgendar, dias, percentual, dataDeInicio, metaMensal, tentativaNum) {
+        // Ordena por urgência (data limite) e depois por hierarquia
+        dfParaAgendar.sort((a, b) => a.DataLimite - b.DataLimite || a.NivelHierarquico - b.NivelHierarquico);
+        
+        // Obtém todos os agendamentos já feitos nas tentativas anteriores
+        const agendamentosExistentes = (processedData || originalData).filter(p => p.DataInicioFerias);
+        let lote = (agendamentosExistentes.length > 0) ? Math.max(...agendamentosExistentes.map(a => a.Lote)) + 1 : 1;
+
+        const totaisPorUnidade = countBy(originalData, 'Unidade');
+
+        for (const funcionario of dfParaAgendar) {
+            let dataDeBusca = new Date(dataDeInicio);
+            let slotEncontrado = false;
+            let loopGuard = 0; // Evita loops infinitos
+
+            while (!slotEncontrado && loopGuard < 730) { // Limite de busca de 2 anos
                 let dataInicioProposta = proximoDiaUtil(new Date(dataDeBusca));
 
                 if (dataInicioProposta > funcionario.DataLimite) {
-                    funcionario.Motivo = "Prazo expirado durante busca";
-                    break; // Desiste deste funcionário
+                    funcionario.Motivo = `Prazo Expirado na Tentativa ${tentativaNum}`;
+                    break; 
                 }
                 
                 const mesProposto = dataInicioProposta.getUTCMonth();
                 const anoProposto = dataInicioProposta.getUTCFullYear();
                 
-                // a. Checar Meta Mensal Global
-                const agendadosNoMes = agendamentos.filter(ag => 
+                const agendadosNoMes = agendamentosExistentes.filter(ag => 
                     ag.DataInicioFerias.getUTCMonth() === mesProposto &&
                     ag.DataInicioFerias.getUTCFullYear() === anoProposto
                 ).length;
                 
-                if (agendadosNoMes >= metaMensalGlobal) {
-                    // Mês cheio, pula para o próximo mês
+                if (agendadosNoMes >= metaMensal) {
                     dataDeBusca.setUTCMonth(dataDeBusca.getUTCMonth() + 1, 1);
+                    loopGuard++;
                     continue; 
                 }
                 
-                // b. Checar Concorrência na Unidade
                 const dataFimProposta = gerarDataFim(dataInicioProposta, dias);
                 const limiteSimultaneo = Math.max(1, Math.floor(totaisPorUnidade[funcionario.Unidade] * percentual));
 
-                const conflitos = agendamentos.filter(ag => 
+                const conflitos = agendamentosExistentes.filter(ag => 
                     ag.Unidade === funcionario.Unidade &&
-                    Math.max(ag.DataInicioFerias, dataInicioProposta) <= Math.min(ag.DataFimFerias, dataFimProposta)
+                    Math.max(new Date(ag.DataInicioFerias), dataInicioProposta) <= Math.min(new Date(ag.DataFimFerias), dataFimProposta)
                 );
 
                 if (conflitos.length < limiteSimultaneo) {
-                    // Vaga encontrada!
                     funcionario.DataInicioFerias = dataInicioProposta;
                     funcionario.DataFimFerias = dataFimProposta;
                     funcionario.Lote = lote++;
-                    agendamentos.push(funcionario);
+                    agendamentosExistentes.push(funcionario);
                     slotEncontrado = true;
                 } else {
-                    // Conflito, pula para o fim do bloqueio
-                    const maxFimConflito = new Date(Math.max.apply(null, conflitos.map(c => c.DataFimFerias)));
+                    const maxFimConflito = new Date(Math.max.apply(null, conflitos.map(c => new Date(c.DataFimFerias))));
                     dataDeBusca = new Date(maxFimConflito);
                     dataDeBusca.setUTCDate(dataDeBusca.getUTCDate() + 1);
                 }
+                loopGuard++;
+            }
+             if(!slotEncontrado && !funcionario.Motivo) {
+                 funcionario.Motivo = `Sem vaga encontrada na Tentativa ${tentativaNum}`;
             }
         }
-        
-        processedData = df;
-        updateUIWithResults(df, percentual, totalMeses, metaMensalGlobal);
     }
     
     // --- Funções de UI e Visualização ---
 
-    function updateUIWithResults(data, percentual, totalMeses, metaMensalGlobal) {
+    function updateUIWithResults(data, percentualFinal, totalMeses, metaMensalGlobal, tentativas) {
         initialMessage.style.display = 'none';
         resultsSection.style.display = 'block';
 
@@ -271,12 +293,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <div><p>Total Processado</p><h3>${data.length}</h3></div>
             <div><p>✅ Com Férias</p><h3>${agendados.length}</h3></div>
             <div><p>⚠️ Pendentes</p><h3>${ignorados.length}</h3></div>
-            <div><p>📊 Meta Mensal</p><h3>~${metaMensalGlobal}</h3></div>
+            <div><p>🚀 Tentativas</p><h3>${tentativas}</h3></div>
         `;
         const taxaSucesso = data.length > 0 ? (agendados.length / data.length) * 100 : 0;
-        successRate.innerHTML = `<progress value="${taxaSucesso}" max="100" style="width: 100%;"></progress> <p style="text-align:center;">Taxa de Sucesso: ${taxaSucesso.toFixed(1)}% | Período: ${totalMeses} meses</p>`;
+        successRate.innerHTML = `<progress value="${taxaSucesso}" max="100" style="width: 100%;"></progress> <p style="text-align:center;">Taxa de Sucesso: ${taxaSucesso.toFixed(1)}% | Meta Inicial: ~${metaMensalGlobal}/mês | % Final: ${Math.round(percentualFinal*100)}%</p>`;
         
-        updateVisualizations(data, percentual);
+        updateVisualizations(data, percentualFinal);
         updateCronograma(data);
         updateExceptions(ignorados);
     }
@@ -357,7 +379,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         exceptionsTable.innerHTML = tableHtml + "</tbody></table>";
         const motivosContagem = countBy(ignorados.filter(i => i.Motivo), 'Motivo');
-        exceptionsMotives.innerHTML = "<p><strong>Principais Motivos da Falha:</strong></p>" + Object.entries(motivosContagem).map(([motivo, count]) => `<li>${motivo}: ${count}</li>`).join('');
+        exceptionsMotives.innerHTML = "<p><strong>Principais Motivos da Falha:</strong></p><ul>" + Object.entries(motivosContagem).map(([motivo, count]) => `<li>${motivo}: ${count}</li>`).join('') + "</ul>";
     }
 
     function exportData() {
@@ -394,7 +416,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Event Listeners ---
     percentualSimultaneo.addEventListener("input", updatePercentualUI);
     excelFile.addEventListener("change", handleFileUpload);
-    processButton.addEventListener("click", processarComMetaGlobal); // <--- MUDANÇA IMPORTANTE
+    processButton.addEventListener("click", iniciarProcessamentoCompleto); // <--- MUDANÇA IMPORTANTE
     exportButton.addEventListener("click", exportData);
     tabButtons.forEach(button => {
         button.addEventListener("click", () => {
