@@ -11,21 +11,21 @@
         <aside class="sidebar">
             <h2>⚙️ CONFIGURAÇÕES</h2>
             
-            <section id="upload-section">
+            <section class="widget">
                 <h3>📁 PASSO 1: Arquivo</h3>
                 <p class="info">Carregue o arquivo Excel com os dados dos colaboradores.</p>
                 <input type="file" id="excelFile" accept=".xlsx, .xls">
                 <div id="fileStatus"></div>
             </section>
 
-            <section id="parameters-section">
+            <section class="widget">
                 <h3>⚙️ PASSO 2: Parâmetros</h3>
                 <div>
                     <label for="diasFerias">Dias de Férias:</label>
                     <input type="number" id="diasFerias" min="1" max="60" value="30">
                 </div>
                 <div>
-                    <label for="percentualSimultaneo">Percentual Máximo Simultâneo (%):</label>
+                    <label for="percentualSimultaneo">Percentual Máximo Simultâneo:</label>
                     <div class="range-container">
                         <input type="range" id="percentualSimultaneo" min="1" max="100" value="20">
                         <span id="percentualValue">20%</span>
@@ -38,7 +38,7 @@
                 </div>
             </section>
 
-            <section id="selection-section">
+            <section class="widget">
                 <h3>🎯 PASSO 3: Seleção</h3>
                 <div>
                     <label for="celulasCusto">Centros de Custo:</label>
@@ -59,36 +59,7 @@
                 <h3>Sistema para distribuição inteligente de férias com garantia de 100% da planilha</h3>
             </header>
 
-            <section id="guide">
-                <details>
-                    <summary>📋 Ver Guia de Uso Rápido</summary>
-                    <div class="guide-content">
-                        <div>
-                            <h4>📁 ESTRUTURA DO ARQUIVO EXCEL:</h4>
-                            <ul>
-                                <li>✅ Mínimo 14 colunas (A até N)</li>
-                                <li>✅ Coluna C: Nome dos colaboradores</li>
-                                <li>✅ Coluna F: Centro de Custo (formato: `525 - Orb Atc - Sp Alexia Dayane`)</li>
-                                <li>✅ Coluna G: Subcélula/Unidade</li>
-                                <li>✅ Coluna M: Data Limite (dd/mm/aaaa)</li>
-                                <li>✅ Coluna N: Cargo dos colaboradores</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4>⚙️ COMO USAR:</h4>
-                            <ol>
-                                <li>Carregue o arquivo na barra lateral</li>
-                                <li>Configure dias, percentual e data</li>
-                                <li>Selecione os filtros (opcional)</li>
-                                <li>Clique em "Processar"</li>
-                                <li>Analise e exporte os resultados</li>
-                            </ol>
-                        </div>
-                    </div>
-                </details>
-            </section>
-            
-            <section id="results-section" style="display: none;">
+            <section id="results-section" class="widget" style="display: none;">
                 <h2>📊 Estatísticas da Simulação</h2>
                 <div id="statsMetrics"></div>
                 <div id="successRate"></div>
@@ -100,16 +71,18 @@
                     <button class="tab-button" data-tab="tab3">Real × Limite</button>
                     <button class="tab-button" data-tab="tab4">Análise Datas Limite</button>
                 </div>
-                <div id="tab1" class="tab-content active"></div>
-                <div id="tab2" class="tab-content"></div>
-                <div id="tab3" class="tab-content"></div>
-                <div id="tab4" class="tab-content"></div>
+                <div class="tab-content-wrapper">
+                    <div id="tab1" class="tab-content active"></div>
+                    <div id="tab2" class="tab-content"></div>
+                    <div id="tab3" class="tab-content"></div>
+                    <div id="tab4" class="tab-content"></div>
+                </div>
 
                 <h2>📅 Cronograma de Férias</h2>
                 <div id="cronogramaTable"></div>
                 <div id="cronogramaInfo"></div>
 
-                <div id="exceptions-section">
+                <div id="exceptions-section" style="display: none;">
                     <h2>🔍 Colaboradores Sem Agendamento</h2>
                     <div id="exceptionsTable"></div>
                     <div id="exceptionsMotives"></div>
@@ -119,8 +92,17 @@
                 <button id="exportButton">📥 BAIXAR CRONOGRAMA (Excel)</button>
             </section>
 
-            <section id="initial-message">
-                <p>👈 Para começar, carregue um arquivo Excel na barra lateral.</p>
+            <section id="initial-message" class="widget">
+                <h2>Bem-vindo!</h2>
+                <p class="info">👈 Para começar, carregue um arquivo Excel na barra lateral esquerda.</p>
+                <h4>📋 Estrutura Esperada do Arquivo:</h4>
+                <ul>
+                    <li>✅ **Coluna C:** Nome</li>
+                    <li>✅ **Coluna F:** Centro de Custo</li>
+                    <li>✅ **Coluna G:** Unidade</li>
+                    <li>✅ **Coluna M:** Data Limite</li>
+                    <li>✅ **Coluna N:** Cargo</li>
+                </ul>
             </section>
         </main>
     </div>
