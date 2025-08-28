@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const file = event.target.files[0];
         if (!file) return;
 
-        fileStatus.textContent = "⏳ Processando...";
+        fileStatus.innerHTML = "⏳ Processando...";
         try {
             const data = await file.arrayBuffer();
             const workbook = XLSX.read(data);
@@ -113,26 +113,34 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             
             df = df.map(row => {
-                const [codigo, descricao, celulaCentral] = processarCentroCusto(row[headers[5]]);
+                // Adiciona verificação para garantir que as colunas existem antes de acessá-las
+                const nome = headers.length > 2 ? row[headers[2]] : null;
+                const centroCustoCompleto = headers.length > 5 ? row[headers[5]] : null;
+                const unidade = headers.length > 6 ? row[headers[6]] : null;
+                const dataLimiteRaw = headers.length > 12 ? row[headers[12]] : null;
+                const cargo = headers.length > 13 ? row[headers[13]] : null;
+                
+                const [codigo, descricao, celulaCentral] = processarCentroCusto(centroCustoCompleto);
+
                 return {
-                    Nome: row[headers[2]],
-                    CentroCustoCompleto: row[headers[5]],
+                    Nome: nome,
+                    CentroCustoCompleto: centroCustoCompleto,
                     CodigoCusto: codigo,
                     DescricaoCusto: descricao,
                     CelulaCentral: celulaCentral,
-                    Unidade: row[headers[6]],
-                    DataLimite: row[headers[12]] ? new Date((row[headers[12]] - 25569) * 86400000) : null,
-                    Cargo: row[headers[13]]
+                    Unidade: unidade,
+                    DataLimite: dataLimiteRaw ? new Date((dataLimiteRaw - 25569) * 86400000) : null,
+                    Cargo: cargo
                 };
             }).filter(row => row.Nome && row.CelulaCentral !== 'Outros' && row.Unidade);
             
             originalData = df;
-            fileStatus.textContent = `✅ ${df.length} colaboradores carregados.`;
+            fileStatus.innerHTML = `✅ ${df.length} colaboradores carregados.`;
             processButton.disabled = false;
             populateFilters(df);
 
         } catch (error) {
-            fileStatus.textContent = `❌ Erro: ${error.message}`;
+            fileStatus.innerHTML = `❌ Erro: ${error.message}`;
             console.error(error);
         }
     }
@@ -168,7 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
             row.NivelHierarquico = classificarHierarquiaCargo(row.Cargo);
         });
         
-        // Lógica de múltiplas tentativas
         let tentativas = 0;
         const maxTentativas = 3;
         let percentualAtual = percentual;
@@ -184,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             
             let dataInicialTentativa = new Date(inicio);
-            dataInicialTentativa.setDate(dataInicialTentativa.getDate() + (tentativas * 30));
+            dataInicialTentativa.setDate(dataInicialTentativa.getDate() + (tentativas * 45));
             
             processarLote(pendentes, dias, percentualAtual, dataInicialTentativa);
 
@@ -243,8 +250,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    // --- Funções de Atualização da UI e Visualização ---
-
     function updateUIWithResults(data, percentual, tentativas) {
         initialMessage.style.display = 'none';
         resultsSection.style.display = 'block';
@@ -252,31 +257,28 @@ document.addEventListener("DOMContentLoaded", () => {
         const agendados = data.filter(r => r.DataInicioFerias);
         const ignorados = data.filter(r => !r.DataInicioFerias);
 
-        // Stats
         statsMetrics.innerHTML = `
             <div><p>Total Processado</p><h3>${data.length}</h3></div>
             <div><p>✅ Com Férias</p><h3>${agendados.length}</h3></div>
             <div><p>⚠️ Pendentes</p><h3>${ignorados.length}</h3></div>
-            <div><p>Tentativas</p><h3>${tentativas}</h3></div>
+            <div><p>🚀 Tentativas</p><h3>${tentativas}</h3></div>
         `;
         const taxaSucesso = data.length > 0 ? (agendados.length / data.length) * 100 : 0;
-        successRate.innerHTML = `<progress value="${taxaSucesso}" max="100"></progress> <p>Taxa de Sucesso: ${taxaSucesso.toFixed(1)}%</p>`;
+        successRate.innerHTML = `<progress value="${taxaSucesso}" max="100" style="width: 100%;"></progress> <p style="text-align:center;">Taxa de Sucesso: ${taxaSucesso.toFixed(1)}%</p>`;
         
-        // Visualizations
         updateVisualizations(data, percentual);
-        
-        // Tables
         updateCronograma(data);
         updateExceptions(ignorados);
     }
     
     function updateVisualizations(data, percentual) {
         const agendados = data.filter(r => r.DataInicioFerias);
+        if (agendados.length === 0) return;
+        
         const getPeriodo = (d) => { const date = new Date(d); return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; };
         
         const periodos = [...new Set(agendados.map(r => getPeriodo(r.DataInicioFerias)))].sort();
         
-        // Grafico por Unidade
         const dadosPorUnidade = groupBy(agendados, 'Unidade');
         const tracesUnidade = Object.keys(dadosPorUnidade).map(unidade => {
             const contagemMensal = countBy(dadosPorUnidade[unidade], r => getPeriodo(r.DataInicioFerias));
@@ -284,7 +286,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         Plotly.newPlot('tab1', tracesUnidade, { title: 'Distribuição por Unidade', barmode: 'stack' });
 
-        // Grafico por Cargo
         const nivelMap = {1: 'Alta Gestão', 2: 'Média Gestão', 3: 'Operacional'};
         const dadosPorNivel = groupBy(agendados, r => nivelMap[r.NivelHierarquico]);
         const tracesCargo = Object.keys(dadosPorNivel).map(nivel => {
@@ -293,7 +294,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         Plotly.newPlot('tab2', tracesCargo, { title: 'Distribuição por Nível Hierárquico', barmode: 'stack' });
 
-        // Gráfico Real vs Limite
         const totalPorUnidade = countBy(data, 'Unidade');
         const tracesRealLimite = [];
         Object.keys(dadosPorUnidade).forEach(unidade => {
@@ -304,9 +304,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         Plotly.newPlot('tab3', tracesRealLimite, { title: 'Real vs. Limite por Unidade', barmode: 'group' });
         
-        // Grafico Datas Limite
-        const dadosPorDataLimite = groupBy(data.filter(r=>r.DataLimite), 'Unidade');
-        const periodosLimite = [...new Set(data.filter(r=>r.DataLimite).map(r => getPeriodo(r.DataLimite)))].sort();
+        const dadosComLimite = data.filter(r => r.DataLimite);
+        const dadosPorDataLimite = groupBy(dadosComLimite, 'Unidade');
+        const periodosLimite = [...new Set(dadosComLimite.map(r => getPeriodo(r.DataLimite)))].sort();
         const tracesDatasLimite = Object.keys(dadosPorDataLimite).map(unidade => {
              const contagemMensal = countBy(dadosPorDataLimite[unidade], r => getPeriodo(r.DataLimite));
             return { x: periodosLimite, y: periodosLimite.map(p => contagemMensal[p] || 0), name: unidade, type: 'bar' };
@@ -351,7 +351,7 @@ document.addEventListener("DOMContentLoaded", () => {
             </tr>`;
         });
         exceptionsTable.innerHTML = tableHtml + "</tbody></table>";
-        exceptionsMotives.innerHTML = `<p><strong>Motivo principal:</strong> Não foi possível alocar nas ${3} tentativas com os parâmetros atuais.</p>`;
+        exceptionsMotives.innerHTML = `<p class="info"><strong>Motivo principal:</strong> Não foi possível alocar estes <strong>${ignorados.length}</strong> colaboradores nas tentativas realizadas com os parâmetros atuais.</p>`;
     }
 
     function exportData() {
@@ -384,7 +384,6 @@ document.addEventListener("DOMContentLoaded", () => {
         acc[group] = (acc[group] || 0) + 1;
         return acc;
     }, {});
-
 
     // --- Event Listeners ---
     percentualSimultaneo.addEventListener("input", updatePercentualUI);
