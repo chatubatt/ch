@@ -154,11 +154,12 @@ document.addEventListener("DOMContentLoaded", () => {
         subcelulasUnidades.innerHTML = unidades.map(u => `<option value="${u}" selected>${u}</option>`).join('');
     }
 
-    // --- ALGORITMO PRINCIPAL OTIMIZADO (V4) ---
+    // --- ALGORITMO PRINCIPAL COM O RACIONAL GLOBAL (V5) ---
 
-    function processarFeriasFinal() {
+    function processarComMetaGlobal() {
         if (!originalData) return;
 
+        // 1. Obter parâmetros e filtrar dados
         const dias = parseInt(diasFerias.value, 10);
         const percentual = parseFloat(percentualSimultaneo.value) / 100;
         const inicioParts = dataInicial.value.split('-');
@@ -171,104 +172,95 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedCelulas.includes(row.CelulaCentral) && selectedUnidades.includes(row.Unidade)
         )));
 
+        if (df.length === 0) {
+            alert("Nenhum colaborador encontrado para os filtros selecionados.");
+            return;
+        }
+
         df.forEach(row => {
             row.DataInicioFerias = null;
             row.DataFimFerias = null;
             row.Lote = null;
-            row.DataLimite = row.DataLimite ? new Date(row.DataLimite) : null;
+            row.DataLimite = new Date(row.DataLimite);
             row.NivelHierarquico = classificarHierarquiaCargo(row.Cargo);
         });
 
-        let dataDisponivelGlobal = new Date(dataDeInicioGlobal);
-        let loteGlobal = 1;
-        const unidades = [...new Set(df.map(r => r.Unidade))].sort();
+        // 2. Calcular Parâmetros Globais (lógica da "Cia de Gás")
+        const datasLimite = df.map(r => r.DataLimite);
+        const dataLimiteMinima = new Date(Math.min.apply(null, datasLimite));
+        const dataLimiteMaxima = new Date(Math.max.apply(null, datasLimite));
 
-        for (const unidade of unidades) {
-            const dfUnidade = df.filter(f => f.Unidade === unidade);
-            if (dfUnidade.length === 0) continue;
+        const totalDias = (dataLimiteMaxima - dataLimiteMinima) / (1000 * 60 * 60 * 24);
+        const totalMeses = Math.max(1, Math.round(totalDias / 31));
+        const metaMensalGlobal = Math.ceil(df.length / totalMeses);
 
-            const resultadoUnidade = agendarUnidade(dfUnidade, dias, percentual, dataDisponivelGlobal, loteGlobal);
-            
-            dataDisponivelGlobal = resultadoUnidade.ultimaDataUsada;
-            loteGlobal = resultadoUnidade.ultimoLote;
-        }
+        // 3. Priorizar por Urgência (Data Limite) e depois por Hierarquia
+        df.sort((a, b) => a.DataLimite - b.DataLimite || a.NivelHierarquico - b.NivelHierarquico);
         
-        processedData = df;
-        updateUIWithResults(df, percentual);
-    }
+        // 4. Agendamento
+        let agendamentos = [];
+        let lote = 1;
+        const totaisPorUnidade = countBy(df, 'Unidade');
 
-    function agendarUnidade(dfUnidade, dias, percentual, dataInicioUnidade, loteInicio) {
-        const datasLimiteUnidade = dfUnidade.map(r => r.DataLimite);
-        const dataLimiteMaximaUnidade = new Date(Math.max.apply(null, datasLimiteUnidade));
-        
-        const mesesTotaisUnidade = (dataLimiteMaximaUnidade.getUTCFullYear() - dataInicioUnidade.getUTCFullYear()) * 12 +
-                                   (dataLimiteMaximaUnidade.getUTCMonth() - dataInicioUnidade.getUTCMonth()) + 1;
-
-        const metaMensalUnidade = Math.ceil(dfUnidade.length / Math.max(1, mesesTotaisUnidade));
-        
-        dfUnidade.sort((a, b) => a.DataLimite - b.DataLimite);
-
-        let dataDisp = new Date(dataInicioUnidade);
-        let lote = loteInicio;
-        let agendamentosNestaUnidade = [];
-
-        for (const funcionario of dfUnidade) {
-            let mesCorrente = dataDisp.getUTCMonth();
-            let agendadosNoMes = agendamentosNestaUnidade.filter(ag => ag.DataInicioFerias.getUTCMonth() === mesCorrente).length;
-            
-            const prazoEstaCurto = (funcionario.DataLimite.getUTCFullYear() === dataDisp.getUTCFullYear() && 
-                                  funcionario.DataLimite.getUTCMonth() <= dataDisp.getUTCMonth() + 1);
-
-            if (agendadosNoMes >= metaMensalUnidade && !prazoEstaCurto) {
-                dataDisp.setUTCMonth(dataDisp.getUTCMonth() + 1, 1);
-            }
-
+        for (const funcionario of df) {
+            let dataDeBusca = new Date(dataDeInicioGlobal);
             let slotEncontrado = false;
-            let tentativasBusca = 0;
-            while (!slotEncontrado && tentativasBusca < 365) { // Limite de busca de 1 ano
-                let dataInicioProposta = proximoDiaUtil(new Date(dataDisp));
+            
+            while (!slotEncontrado) {
+                let dataInicioProposta = proximoDiaUtil(new Date(dataDeBusca));
 
                 if (dataInicioProposta > funcionario.DataLimite) {
-                    funcionario.Motivo = "Prazo Expirado durante a busca";
-                    break; 
+                    funcionario.Motivo = "Prazo expirado durante busca";
+                    break; // Desiste deste funcionário
                 }
                 
-                const dataFimProposta = gerarDataFim(dataInicioProposta, dias);
-                const limiteSimultaneo = Math.max(1, Math.floor(dfUnidade.length * percentual));
+                const mesProposto = dataInicioProposta.getUTCMonth();
+                const anoProposto = dataInicioProposta.getUTCFullYear();
                 
-                const conflitos = agendamentosNestaUnidade.filter(ag => 
+                // a. Checar Meta Mensal Global
+                const agendadosNoMes = agendamentos.filter(ag => 
+                    ag.DataInicioFerias.getUTCMonth() === mesProposto &&
+                    ag.DataInicioFerias.getUTCFullYear() === anoProposto
+                ).length;
+                
+                if (agendadosNoMes >= metaMensalGlobal) {
+                    // Mês cheio, pula para o próximo mês
+                    dataDeBusca.setUTCMonth(dataDeBusca.getUTCMonth() + 1, 1);
+                    continue; 
+                }
+                
+                // b. Checar Concorrência na Unidade
+                const dataFimProposta = gerarDataFim(dataInicioProposta, dias);
+                const limiteSimultaneo = Math.max(1, Math.floor(totaisPorUnidade[funcionario.Unidade] * percentual));
+
+                const conflitos = agendamentos.filter(ag => 
+                    ag.Unidade === funcionario.Unidade &&
                     Math.max(ag.DataInicioFerias, dataInicioProposta) <= Math.min(ag.DataFimFerias, dataFimProposta)
                 );
 
                 if (conflitos.length < limiteSimultaneo) {
+                    // Vaga encontrada!
                     funcionario.DataInicioFerias = dataInicioProposta;
                     funcionario.DataFimFerias = dataFimProposta;
-                    funcionario.Lote = lote;
-                    agendamentosNestaUnidade.push(funcionario);
-                    
-                    dataDisp = new Date(dataInicioProposta);
-                    dataDisp.setUTCDate(dataDisp.getUTCDate() + 1);
-                    
-                    lote++;
+                    funcionario.Lote = lote++;
+                    agendamentos.push(funcionario);
                     slotEncontrado = true;
                 } else {
-                    // Resolução de Conflito Inteligente: Pula para o fim do bloqueio
+                    // Conflito, pula para o fim do bloqueio
                     const maxFimConflito = new Date(Math.max.apply(null, conflitos.map(c => c.DataFimFerias)));
-                    dataDisp = new Date(maxFimConflito);
-                    dataDisp.setUTCDate(dataDisp.getUTCDate() + 1);
+                    dataDeBusca = new Date(maxFimConflito);
+                    dataDeBusca.setUTCDate(dataDeBusca.getUTCDate() + 1);
                 }
-                tentativasBusca++;
-            }
-            if(!slotEncontrado && !funcionario.Motivo) {
-                 funcionario.Motivo = "Não foi encontrado slot válido em 1 ano de busca";
             }
         }
-        return { ultimaDataUsada: dataDisp, ultimoLote: lote };
+        
+        processedData = df;
+        updateUIWithResults(df, percentual, totalMeses, metaMensalGlobal);
     }
     
     // --- Funções de UI e Visualização ---
 
-    function updateUIWithResults(data, percentual) {
+    function updateUIWithResults(data, percentual, totalMeses, metaMensalGlobal) {
         initialMessage.style.display = 'none';
         resultsSection.style.display = 'block';
 
@@ -279,10 +271,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <div><p>Total Processado</p><h3>${data.length}</h3></div>
             <div><p>✅ Com Férias</p><h3>${agendados.length}</h3></div>
             <div><p>⚠️ Pendentes</p><h3>${ignorados.length}</h3></div>
-            <div><p>📊 Racional</p><h3>Meta Flexível</h3></div>
+            <div><p>📊 Meta Mensal</p><h3>~${metaMensalGlobal}</h3></div>
         `;
         const taxaSucesso = data.length > 0 ? (agendados.length / data.length) * 100 : 0;
-        successRate.innerHTML = `<progress value="${taxaSucesso}" max="100" style="width: 100%;"></progress> <p style="text-align:center;">Taxa de Sucesso: ${taxaSucesso.toFixed(1)}%</p>`;
+        successRate.innerHTML = `<progress value="${taxaSucesso}" max="100" style="width: 100%;"></progress> <p style="text-align:center;">Taxa de Sucesso: ${taxaSucesso.toFixed(1)}% | Período: ${totalMeses} meses</p>`;
         
         updateVisualizations(data, percentual);
         updateCronograma(data);
@@ -292,9 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateVisualizations(data, percentual) {
         const agendados = data.filter(r => r.DataInicioFerias);
         if (agendados.length === 0) {
-            document.getElementById('tab1').innerHTML = "<p>Nenhum dado para exibir.</p>";
-            document.getElementById('tab2').innerHTML = "<p>Nenhum dado para exibir.</p>";
-            document.getElementById('tab3').innerHTML = "<p>Nenhum dado para exibir.</p>";
+            ['tab1', 'tab2', 'tab3'].forEach(id => document.getElementById(id).innerHTML = "<p>Nenhum dado para exibir.</p>");
             return;
         }
         
@@ -329,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateCronograma(data) {
         const formatarData = (dStr) => dStr ? new Date(dStr).toLocaleDateString("pt-BR", { timeZone: 'UTC' }) : "---";
-        const colunas = ["Nome", "CentroCustoCompleto", "Unidade", "Cargo", "DataLimite", "DataInicioFerias", "DataFimFerias", "Lote"];
+        const colunas = ["Nome", "Unidade", "Cargo", "DataLimite", "DataInicioFerias", "DataFimFerias"];
         let tableHtml = `<table><thead><tr>${colunas.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>`;
         
         const sortedData = [...data].sort((a,b) => (a.DataInicioFerias ? new Date(a.DataInicioFerias) : new Date('2999-12-31')) - (b.DataInicioFerias ? new Date(b.DataInicioFerias) : new Date('2999-12-31')));
@@ -337,13 +327,11 @@ document.addEventListener("DOMContentLoaded", () => {
         sortedData.forEach(row => {
             tableHtml += `<tr>
                 <td>${row.Nome || ''}</td>
-                <td>${row.CentroCustoCompleto || ''}</td>
                 <td>${row.Unidade || ''}</td>
                 <td>${row.Cargo || 'N/A'}</td>
                 <td>${formatarData(row.DataLimite)}</td>
                 <td>${formatarData(row.DataInicioFerias)}</td>
                 <td>${formatarData(row.DataFimFerias)}</td>
-                <td>${row.Lote || '---'}</td>
             </tr>`;
         });
         cronogramaTable.innerHTML = tableHtml + "</tbody></table>";
@@ -356,7 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         exceptionsSection.style.display = 'block';
-        const colunas = ["Nome", "Unidade", "Cargo", "DataLimite", "Motivo"]; // Adicionada coluna Motivo
+        const colunas = ["Nome", "Unidade", "Cargo", "DataLimite", "Motivo"];
         let tableHtml = `<table><thead><tr>${colunas.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>`;
         ignorados.forEach(row => {
              tableHtml += `<tr>
@@ -406,7 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Event Listeners ---
     percentualSimultaneo.addEventListener("input", updatePercentualUI);
     excelFile.addEventListener("change", handleFileUpload);
-    processButton.addEventListener("click", processarFeriasFinal);
+    processButton.addEventListener("click", processarComMetaGlobal); // <--- MUDANÇA IMPORTANTE
     exportButton.addEventListener("click", exportData);
     tabButtons.forEach(button => {
         button.addEventListener("click", () => {
