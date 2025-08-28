@@ -30,29 +30,29 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Lógica de Negócio (Portado de Python) ---
 
     const FERIADOS = [
-        "2025-01-01", "2025-03-03", "2025-03-04", "2025-04-18", "2025-04-21",
-        "2025-05-01", "2025-06-19", "2025-09-07", "2025-10-12",
-        "2025-11-02", "2025-11-15", "2025-11-20", "2025-12-25"
-    ].map(d => new Date(d + 'T00:00:00').setHours(0, 0, 0, 0));
+        '2025-01-01', '2025-03-03', '2025-03-04', '2025-04-18', '2025-04-21',
+        '2025-05-01', '2025-06-19', '2025-09-07', '2025-10-12',
+        '2025-11-02', '2025-11-15', '2025-11-20', '2025-12-25'
+    ].map(d => new Date(d + 'T12:00:00Z').setUTCHours(0, 0, 0, 0));
 
     function ehDiaUtil(d) {
-        const day = d.getDay();
+        const day = d.getUTCDay();
         const isWeekend = (day === 0 || day === 6); // Domingo=0, Sábado=6
-        const isHoliday = FERIADOS.includes(d.setHours(0, 0, 0, 0));
+        const isHoliday = FERIADOS.includes(d.setUTCHours(0, 0, 0, 0));
         return !isWeekend && !isHoliday;
     }
 
     function proximoDiaUtil(d) {
         let nextDay = new Date(d);
         while (!ehDiaUtil(nextDay)) {
-            nextDay.setDate(nextDay.getDate() + 1);
+            nextDay.setUTCDate(nextDay.getUTCDate() + 1);
         }
         return nextDay;
     }
     
     function gerarDataFim(inicio, dias) {
         let fim = new Date(inicio);
-        fim.setDate(fim.getDate() + dias - 1);
+        fim.setUTCDate(fim.getUTCDate() + dias - 1);
         return fim;
     }
 
@@ -96,14 +96,13 @@ document.addEventListener("DOMContentLoaded", () => {
     async function handleFileUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
-
         fileStatus.innerHTML = "⏳ Processando...";
         try {
             const data = await file.arrayBuffer();
             const workbook = XLSX.read(data);
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
-            const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null });
+            const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null, raw: false });
 
             const headers = json[0].map(h => String(h || '').trim());
             let df = json.slice(1).map(row => {
@@ -118,20 +117,31 @@ document.addEventListener("DOMContentLoaded", () => {
                 const unidade = headers.length > 6 ? row[headers[6]] : null;
                 const dataLimiteRaw = headers.length > 12 ? row[headers[12]] : null;
                 const cargo = headers.length > 13 ? row[headers[13]] : null;
+                const [codigo, , celulaCentral] = processarCentroCusto(centroCustoCompleto);
                 
-                const [codigo, descricao, celulaCentral] = processarCentroCusto(centroCustoCompleto);
+                // Conversão de data do Excel (número serial) ou string
+                let dataLimite = null;
+                if (dataLimiteRaw) {
+                    if (typeof dataLimiteRaw === 'number' && dataLimiteRaw > 1) {
+                         dataLimite = new Date(Date.UTC(1899, 11, 30 + dataLimiteRaw));
+                    } else if (typeof dataLimiteRaw === 'string') {
+                        const parts = dataLimiteRaw.split('/');
+                        if (parts.length === 3) {
+                             dataLimite = new Date(Date.UTC(parts[2], parts[1] - 1, parts[0]));
+                        }
+                    }
+                }
 
                 return {
                     Nome: nome,
                     CentroCustoCompleto: centroCustoCompleto,
                     CodigoCusto: codigo,
-                    DescricaoCusto: descricao,
                     CelulaCentral: celulaCentral,
                     Unidade: unidade,
-                    DataLimite: dataLimiteRaw ? new Date((dataLimiteRaw - 25569) * 86400000) : null,
+                    DataLimite: dataLimite,
                     Cargo: cargo
                 };
-            }).filter(row => row.Nome && row.CelulaCentral !== 'Outros' && row.Unidade);
+            }).filter(row => row.Nome && row.CelulaCentral && row.CelulaCentral !== 'Outros' && row.Unidade);
             
             originalData = df;
             fileStatus.innerHTML = `✅ ${df.length} colaboradores carregados.`;
@@ -139,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
             populateFilters(df);
 
         } catch (error) {
-            fileStatus.innerHTML = `❌ Erro: ${error.message}`;
+            fileStatus.innerHTML = `❌ Erro ao ler arquivo: ${error.message}`;
             console.error(error);
         }
     }
@@ -157,9 +167,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function processVacationData() {
         if (!originalData) return;
         
-        const dias = parseInt(diasFerias.value);
+        const dias = parseInt(diasFerias.value, 10);
         const percentual = parseFloat(percentualSimultaneo.value) / 100;
-        const inicio = new Date(dataInicial.value + 'T00:00:00');
+        const inicioParts = dataInicial.value.split('-');
+        const inicio = new Date(Date.UTC(inicioParts[0], inicioParts[1] - 1, inicioParts[2]));
+        
         const selectedCelulas = Array.from(celulasCusto.selectedOptions).map(opt => opt.value);
         const selectedUnidades = Array.from(subcelulasUnidades.selectedOptions).map(opt => opt.value);
 
@@ -178,50 +190,38 @@ document.addEventListener("DOMContentLoaded", () => {
         let tentativas = 0;
         const maxTentativas = 3;
         let percentualAtual = percentual;
-        let dataDisponivelGlobal = new Date(inicio);
-        let loteGlobal = 1;
 
         while (tentativas < maxTentativas) {
             let pendentes = dfResultadoFinal.filter(row => !row.DataInicioFerias);
             if (pendentes.length === 0) break;
             
-            // Ordenação de prioridade principal
-            pendentes.sort((a, b) => 
-                (a.Unidade || "").localeCompare(b.Unidade || "") ||
-                a.NivelHierarquico - b.NivelHierarquico ||
-                (a.DataLimite || 0) - (b.DataLimite || 0)
-            );
-            
             let dataInicialTentativa = new Date(inicio);
-            if (tentativas > 0) {
-                 dataInicialTentativa.setDate(dataInicialTentativa.getDate() + (tentativas * 45));
-            }
-            // Garante que a nova tentativa não comece antes do fim da última leva agendada
-            const dataDePartida = dataDisponivelGlobal > dataInicialTentativa ? dataDisponivelGlobal : dataInicialTentativa;
+            dataInicialTentativa.setUTCDate(dataInicialTentativa.getUTCDate() + (tentativas * 30));
+            
+            distribuirFerias(pendentes, dias, percentualAtual, dataInicialTentativa);
 
-            const resultadoLote = distribuirFerias(pendentes, dias, percentualAtual, dataDePartida, loteGlobal);
-            dataDisponivelGlobal = resultadoLote.ultimaData; // Atualiza a data global para a próxima tentativa
-            loteGlobal = resultadoLote.ultimoLote;
-
-            percentualAtual = Math.min(1.0, percentualAtual + 0.15);
+            percentualAtual = Math.min(1.0, percentualAtual + 0.1);
             tentativas++;
         }
         
         processedData = dfResultadoFinal;
         updateUIWithResults(processedData, percentual, tentativas);
     }
+    
+    function distribuirFerias(df, dias, percentual, data_inicial) {
+        // Ordenação de prioridade principal
+        df.sort((a, b) => 
+            (a.Unidade || "").localeCompare(b.Unidade || "") ||
+            a.NivelHierarquico - b.NivelHierarquico ||
+            (a.DataLimite || 0) - (b.DataLimite || 0)
+        );
 
-    /**
-     * **FUNÇÃO COM LÓGICA CORRIGIDA**
-     * Processa um DataFrame de colaboradores usando uma linha do tempo única.
-     */
-    function distribuirFerias(df, dias, percentual, data_inicial, lote_inicial) {
-        let data_disp = new Date(data_inicial);
-        let lote = lote_inicial;
+        let lote = 1;
         const unidades = [...new Set(df.map(row => row.Unidade))].sort();
 
-        // A data_disp AGORA É ÚNICA e avança continuamente
         for (const unidade of unidades) {
+            // LÓGICA FIEL AO PYTHON: Reinicia a data para cada unidade
+            let data_disp = new Date(data_inicial);
             const df_unidade = df.filter(row => row.Unidade === unidade);
             if (df_unidade.length === 0) continue;
             
@@ -238,14 +238,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     for (let i = 0; i < grupo.length; i += limite_cargo) {
                         const lote_atual = grupo.slice(i, i + limite_cargo);
                         
-                        // Encontra a próxima data útil para iniciar este lote
                         const ini = proximoDiaUtil(new Date(data_disp));
                         let fim_lote = null;
 
                         for (const row of lote_atual) {
-                            if (!row.DataLimite || ini > row.DataLimite) {
-                                continue;
-                            }
+                            if (!row.DataLimite || ini > row.DataLimite) continue;
+
                             const fim = gerarDataFim(ini, dias);
                             row.DataInicioFerias = ini;
                             row.DataFimFerias = fim;
@@ -254,19 +252,18 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
 
                         if (fim_lote) {
-                            const intervalo_dias = nivel <= 2 ? 7 : 1; // Intervalo maior para gestores
+                            const intervalo_dias = nivel <= 2 ? 7 : 1;
                             data_disp = new Date(fim_lote);
-                            data_disp.setDate(data_disp.getDate() + intervalo_dias);
+                            data_disp.setUTCDate(data_disp.getUTCDate() + intervalo_dias);
                             lote++;
                         }
                     }
                 }
             }
         }
-        return { ultimaData: data_disp, ultimoLote: lote };
     }
     
-    // --- Funções de Atualização da UI e Visualização (sem alterações) ---
+    // --- Funções de Atualização da UI e Visualização ---
 
     function updateUIWithResults(data, percentual, tentativas) {
         initialMessage.style.display = 'none';
@@ -293,7 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const agendados = data.filter(r => r.DataInicioFerias);
         if (agendados.length === 0) return;
         
-        const getPeriodo = (d) => { const date = new Date(d); return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`; };
+        const getPeriodo = (d) => { const date = new Date(d); return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`; };
         
         const periodos = [...new Set(agendados.map(r => getPeriodo(r.DataInicioFerias)))].sort();
         
@@ -321,22 +318,13 @@ document.addEventListener("DOMContentLoaded", () => {
             tracesRealLimite.push({ x: periodos, y: Array(periodos.length).fill(limite), name: `Limite (${unidade})`, type: 'scatter', mode: 'lines', line: {dash: 'dot'} });
         });
         Plotly.newPlot('tab3', tracesRealLimite, { title: 'Real vs. Limite por Unidade', barmode: 'group' });
-        
-        const dadosComLimite = data.filter(r => r.DataLimite);
-        const dadosPorDataLimite = groupBy(dadosComLimite, 'Unidade');
-        const periodosLimite = [...new Set(dadosComLimite.map(r => getPeriodo(r.DataLimite)))].sort();
-        const tracesDatasLimite = Object.keys(dadosPorDataLimite).map(unidade => {
-             const contagemMensal = countBy(dadosPorDataLimite[unidade], r => getPeriodo(r.DataLimite));
-            return { x: periodosLimite, y: periodosLimite.map(p => contagemMensal[p] || 0), name: unidade, type: 'bar' };
-        });
-        Plotly.newPlot('tab4', tracesDatasLimite, { title: 'Distribuição de Datas Limite', barmode: 'stack' });
     }
 
     function updateCronograma(data) {
-        const formatarData = (d) => d ? new Date(d).toLocaleDateString("pt-BR") : "---";
+        const formatarData = (d) => d ? new Date(d).toLocaleDateString("pt-BR", { timeZone: 'UTC' }) : "---";
         const colunas = ["Nome", "CentroCustoCompleto", "Unidade", "Cargo", "DataLimite", "DataInicioFerias", "DataFimFerias", "Lote"];
         let tableHtml = `<table><thead><tr>${colunas.map(c => `<th>${c}</th>`).join('')}</tr></thead><tbody>`;
-        data.sort((a,b) => (a.DataInicioFerias || new Date('2999-12-31')) - (b.DataInicioFerias || new Date('2999-12-31')));
+        data.sort((a,b) => (new Date(a.DataInicioFerias) || new Date('2999-12-31')) - (new Date(b.DataInicioFerias) || new Date('2999-12-31')));
         data.forEach(row => {
             tableHtml += `<tr>
                 <td>${row.Nome || ''}</td>
@@ -366,11 +354,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${row.Nome || ''}</td>
                 <td>${row.Unidade || ''}</td>
                 <td>${row.Cargo || 'N/A'}</td>
-                <td>${row.DataLimite ? new Date(row.DataLimite).toLocaleDateString("pt-BR") : 'N/A'}</td>
+                <td>${row.DataLimite ? new Date(row.DataLimite).toLocaleDateString("pt-BR", { timeZone: 'UTC' }) : 'N/A'}</td>
             </tr>`;
         });
         exceptionsTable.innerHTML = tableHtml + "</tbody></table>";
-        exceptionsMotives.innerHTML = `<p class="info"><strong>Motivo principal:</strong> Não foi possível alocar estes <strong>${ignorados.length}</strong> colaboradores nas tentativas realizadas com os parâmetros atuais.</p>`;
+        exceptionsMotives.innerHTML = `<p class="info"><strong>Motivo:</strong> Não foi possível alocar estes <strong>${ignorados.length}</strong> colaboradores. Isso geralmente ocorre se a data de início calculada for posterior à data limite do colaborador.</p>`;
     }
 
     function exportData() {
@@ -380,9 +368,9 @@ document.addEventListener("DOMContentLoaded", () => {
             Centro_Custo_Completo: row.CentroCustoCompleto,
             Unidade: row.Unidade,
             Cargo: row.Cargo,
-            Data_Limite: row.DataLimite ? new Date(row.DataLimite).toLocaleDateString("pt-BR") : "",
-            Data_Inicio_Ferias: row.DataInicioFerias ? new Date(row.DataInicioFerias).toLocaleDateString("pt-BR") : "",
-            Data_Fim_Ferias: row.DataFimFerias ? new Date(row.DataFimFerias).toLocaleDateString("pt-BR") : "",
+            Data_Limite: row.DataLimite ? new Date(row.DataLimite).toLocaleDateString("pt-BR", { timeZone: 'UTC' }) : "",
+            Data_Inicio_Ferias: row.DataInicioFerias ? new Date(row.DataInicioFerias).toLocaleDateString("pt-BR", { timeZone: 'UTC' }) : "",
+            Data_Fim_Ferias: row.DataFimFerias ? new Date(row.DataFimFerias).toLocaleDateString("pt-BR", { timeZone: 'UTC' }) : "",
             Lote: row.Lote,
         }));
         const ws = XLSX.utils.json_to_sheet(dataExport);
