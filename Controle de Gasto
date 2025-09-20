@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Gastos Avançado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .expense-item:hover .action-buttons {
+            opacity: 1;
+        }
+        .action-buttons {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+        /* Para esconder as setas do input number */
+        input[type='number']::-webkit-inner-spin-button,
+        input[type='number']::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type='number'] {
+            -moz-appearance: textfield;
+        }
+        .tab-button.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        .gemini-response h3 {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .gemini-response ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .gemini-response li {
+            margin-bottom: 0.25rem;
+        }
+         .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Tela de Login -->
+    <div id="login-overlay" class="fixed inset-0 bg-gray-100 z-50 flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-lg text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Bem-vindo!</h2>
+            <p class="text-gray-500 mb-6">Entre com seu nome de utilizador para aceder aos seus dados.</p>
+            <form id="login-form">
+                <input type="text" id="username-input" placeholder="Digite seu nome de utilizador" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition mb-4" required>
+                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                    Entrar ou Criar
+                </button>
+            </form>
+            <div id="existing-users-container" class="mt-6">
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Ou selecione um utilizador existente:</h3>
+                <div id="users-list" class="flex flex-wrap justify-center gap-2">
+                    <!-- Utilizadores existentes serão inseridos aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container Principal da Aplicação -->
+    <div id="app-container" class="hidden">
+        <div class="container mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
+            <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+                
+                <!-- Cabeçalho -->
+                <div class="text-center mb-8 relative">
+                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Controle de Gastos</h1>
+                    <p class="text-gray-500 mt-2">Utilizador: <span id="current-user-display" class="font-semibold text-blue-600"></span></p>
+                    <button id="logout-btn" class="absolute top-0 right-0 bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition text-sm">
+                        Sair
+                    </button>
+                </div>
+                
+                <!-- Navegação por Abas -->
+                <div class="mb-8 border-b border-gray-200">
+                    <nav class="flex space-x-4 -mb-px" aria-label="Tabs">
+                        <button id="tab-lancamentos" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Lançamentos
+                        </button>
+                        <button id="tab-relatorio" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Relatório Anual
+                        </button>
+                        <button id="tab-analise" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Análise Inteligente
+                        </button>
+                    </nav>
+                </div>
+                
+                <!-- Conteúdo da Aba Lançamentos -->
+                <div id="content-lancamentos">
+                    <!-- Resumo do Mês Selecionado -->
+                    <div id="summary-card" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-green-500 text-white p-6 rounded-xl shadow-md">
+                            <h2 class="text-lg font-medium text-green-200">Receitas do Mês</h2>
+                            <p id="total-income-month" class="text-3xl font-bold mt-1">R$ 0,00</p>
+                        </div>
+                        <div class="bg-red-500 text-white p-6 rounded-xl shadow-md">
+                            <h2 class="text-lg font-medium text-red-200">Despesas do Mês</h2>
+                            <p id="total-expense-month" class="text-3xl font-bold mt-1">R$ 0,00</p>
+                        </div>
+                        <div class="bg-blue-600 text-white p-6 rounded-xl shadow-md">
+                            <h2 class="text-lg font-medium text-blue-200">Saldo do Mês</h2>
+                            <p id="balance-month" class="text-3xl font-bold mt-1">R$ 0,00</p>
+                        </div>
+                    </div>
+                     <!-- Gráfico de Categorias do Mês -->
+                    <div class="mb-8">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Gastos por Categoria no Mês</h2>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200" style="height: 350px; position: relative;">
+                            <canvas id="category-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Salário e Projeção Futura -->
+                    <div class="mb-8">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Salário & Projeção Futura</h2>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <div class="mb-4">
+                                <label for="salary" class="block text-sm font-medium text-gray-600 mb-1">Seu Salário Mensal (R$)</label>
+                                <input type="number" id="salary" step="0.01" min="0" placeholder="Ex: 3000,00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition">
+                            </div>
+                            <div id="future-projection" class="space-y-2">
+                                <!-- Projeção será inserida aqui via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulário para Adicionar Gasto -->
+                    <div class="mb-8" id="add-expense-section">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Adicionar Novo Gasto</h2>
+                        <form id="expense-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end p-4 bg-gray-50 rounded-lg border">
+                            <div class="col-span-1 sm:col-span-2">
+                                <label for="description" class="block text-sm font-medium text-gray-600 mb-1">Descrição</label>
+                                <input type="text" id="description" placeholder="Ex: Compra de Notebook" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition" required>
+                            </div>
+                            
+                            <div class="col-span-1 sm:col-span-2 flex items-center gap-x-6">
+                                <label class="block text-sm font-medium text-gray-600">Tipo de Lançamento:</label>
+                                <div class="flex items-center gap-x-4">
+                                    <div class="flex items-center">
+                                        <input id="type-fixed" name="expense-type" type="radio" value="fixed" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500" checked>
+                                        <label for="type-fixed" class="ml-2 block text-sm text-gray-900">Parcela Fixa</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input id="type-monthly" name="expense-type" type="radio" value="monthly" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500">
+                                        <label for="type-monthly" class="ml-2 block text-sm text-gray-900">Mensal</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-1 col-span-2">
+                                <label for="amount" id="amount-label" class="block text-sm font-medium text-gray-600 mb-1">Valor Total (R$)</label>
+                                <input type="number" id="amount" step="0.01" min="0" placeholder="Ex: 1200,00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition" required>
+                            </div>
+                             <div class="sm:col-span-1 col-span-2">
+                                <label for="installments" id="installments-label" class="block text-sm font-medium text-gray-600 mb-1">Nº de Parcelas</label>
+                                <input type="number" id="installments" min="1" placeholder="Vazio para despesa contínua" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition">
+                            </div>
+                            <div>
+                                <label for="date" class="block text-sm font-medium text-gray-600 mb-1">Data da 1ª Parcela</label>
+                                <input type="date" id="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition" required>
+                            </div>
+                            <div>
+                                <label for="category" class="block text-sm font-medium text-gray-600 mb-1">Categoria</label>
+                                <select id="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition bg-white">
+                                    <option value="Alimentação">Alimentação</option>
+                                    <option value="Transporte">Transporte</option>
+                                    <option value="Moradia">Moradia</option>
+                                    <option value="Lazer">Lazer</option>
+                                    <option value="Saúde">Saúde</option>
+                                    <option value="Compras">Compras</option>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
+                            <div class="col-span-1 sm:col-span-2">
+                                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition transform hover:scale-105">
+                                    Adicionar Gasto
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Formulário para Adicionar Receita -->
+                    <div class="mb-8" id="add-income-section">
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Adicionar Nova Receita</h2>
+                        <form id="income-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end p-4 bg-gray-50 rounded-lg border">
+                            <div class="col-span-1 sm:col-span-2">
+                                <label for="income-description" class="block text-sm font-medium text-gray-600 mb-1">Descrição</label>
+                                <input type="text" id="income-description" placeholder="Ex: Venda de item" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition" required>
+                            </div>
+                            <div>
+                                <label for="income-amount" class="block text-sm font-medium text-gray-600 mb-1">Valor (R$)</label>
+                                <input type="number" id="income-amount" step="0.01" min="0" placeholder="Ex: 300,00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition" required>
+                            </div>
+                            <div>
+                                <label for="income-date" class="block text-sm font-medium text-gray-600 mb-1">Data</label>
+                                <input type="date" id="income-date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition" required>
+                            </div>
+                            <div class="col-span-1 sm:col-span-2">
+                                <button type="submit" class="w-full bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition transform hover:scale-105">
+                                    Adicionar Receita
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Lista de Gastos -->
+                    <div>
+                         <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
+                            <h2 class="text-xl font-semibold text-gray-700">Histórico de Gastos do Mês</h2>
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center gap-2">
+                                    <button id="import-btn" title="Importar JSON" class="p-2 rounded-full hover:bg-gray-200 transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg></button>
+                                    <button id="export-btn" title="Exportar JSON" class="p-2 rounded-full hover:bg-gray-200 transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
+                                    <button id="delete-month-btn" title="Apagar Lançamentos do Mês" class="p-2 rounded-full hover:bg-red-100 transition text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button>
+                                    <button id="reset-btn" title="Zerar Tudo" class="p-2 rounded-full hover:bg-red-100 transition text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></button>
+                                    <input type="file" id="import-file-input" class="hidden" accept=".json">
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button id="prev-month-btn" class="p-2 rounded-full hover:bg-gray-200 transition"><svg class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg></button>
+                                    <span id="current-month-display" class="font-semibold text-gray-700 w-32 text-center"></span>
+                                    <button id="next-month-btn" class="p-2 rounded-full hover:bg-gray-200 transition"><svg class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="expense-list" class="space-y-3">
+                             <p id="empty-state" class="text-center text-gray-500 py-6">Nenhum gasto neste mês.</p>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Receitas -->
+                    <div class="mt-8">
+                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Histórico de Receitas do Mês</h2>
+                         <div id="income-list" class="space-y-3">
+                            <p id="empty-state-income" class="text-center text-gray-500 py-6">Nenhuma receita neste mês.</p>
+                         </div>
+                    </div>
+                </div>
+                
+                <!-- Conteúdo da Aba Relatório -->
+                <div id="content-relatorio" class="hidden">
+                     <h2 class="text-2xl font-semibold text-gray-700 mb-6">Gráfico Anual: Receitas vs. Despesas</h2>
+                     <div class="mb-4 p-4 bg-gray-50 rounded-lg border">
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">Filtrar Meses do Gráfico</h3>
+                        <div id="month-filter-container" class="flex flex-wrap gap-x-4 gap-y-2">
+                            <!-- Checkboxes serão inseridos aqui -->
+                        </div>
+                     </div>
+                     <div class="mb-8 bg-gray-50 p-4 rounded-lg border" style="height: 400px;">
+                        <canvas id="annual-chart"></canvas>
+                     </div>
+
+                     <h2 class="text-2xl font-semibold text-gray-700 mb-4">Relatório Detalhado</h2>
+                     <div id="annual-report" class="overflow-x-auto">
+                        <!-- Tabela de relatório será inserida aqui -->
+                     </div>
+                </div>
+
+                <!-- Conteúdo da Aba Análise Inteligente -->
+                <div id="content-analise" class="hidden">
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">Análise Financeira com Gemini</h2>
+                    <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <p class="text-gray-600 mb-4">Obtenha insights e dicas personalizadas sobre suas finanças. A IA irá analisar seus dados dos últimos meses para gerar um relatório exclusivo para você.</p>
+                        <button id="gemini-analysis-btn" class="w-full bg-purple-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition transform hover:scale-105 flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /></svg>
+                            Gerar Análise com Gemini
+                        </button>
+
+                        <div id="gemini-loading" class="hidden mt-6">
+                            <div class="loader"></div>
+                            <p class="text-center text-gray-500">A analisar os seus dados... Por favor, aguarde.</p>
+                        </div>
+
+                        <div id="gemini-response-container" class="mt-6">
+                            <!-- A resposta da IA aparecerá aqui -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal de Confirmação para Zerar -->
+    <div id="reset-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Zerar Todas as Configurações?</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        Esta ação é irreversível. Todos os seus gastos, receitas e salário salvos para este utilizador serão apagados permanentemente.
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3 flex flex-col gap-3">
+                    <button id="confirm-reset-btn" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        Sim, Zerar Tudo
+                    </button>
+                    <button id="cancel-reset-btn" class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <!-- Modal de Confirmação para Apagar Lançamentos do Mês -->
+    <div id="delete-month-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Apagar Lançamentos do Mês?</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        Todos os gastos e receitas de <span id="delete-month-name" class="font-bold"></span> serão apagados. Deseja continuar?
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3 flex flex-col gap-3">
+                    <button id="confirm-delete-month-btn" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        Sim, Apagar
+                    </button>
+                    <button id="cancel-delete-month-btn" class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para Apagar Despesa Recorrente -->
+    <div id="delete-recurring-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                     <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Apagar Despesa Recorrente</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        Esta é uma despesa recorrente. Deseja apagar apenas esta parcela ou todas as futuras?
+                    </p>
+                </div>
+                <div class="items-center px-4 py-3 flex flex-col gap-3">
+                    <button id="delete-one-btn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Apenas esta Parcela
+                    </button>
+                    <button id="delete-all-future-btn" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        Todas as Futuras
+                    </button>
+                    <button id="cancel-delete-recurring-btn" class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal de Edição -->
+    <div id="edit-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <form id="edit-form">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="edit-modal-title">Editar Item</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label for="edit-description" class="block text-sm font-medium text-gray-700">Descrição</label>
+                        <input type="text" id="edit-description" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                    </div>
+                    <div>
+                        <label for="edit-amount" class="block text-sm font-medium text-gray-700">Valor (R$)</label>
+                        <input type="number" id="edit-amount" step="0.01" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                    </div>
+                    <div>
+                        <label for="edit-date" class="block text-sm font-medium text-gray-700">Data</label>
+                        <input type="date" id="edit-date" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                    </div>
+                    <div id="edit-category-container">
+                        <label for="edit-category" class="block text-sm font-medium text-gray-700">Categoria</label>
+                        <select id="edit-category" class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="Alimentação">Alimentação</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Moradia">Moradia</option>
+                            <option value="Lazer">Lazer</option>
+                            <option value="Saúde">Saúde</option>
+                            <option value="Compras">Compras</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <p class="text-xs text-gray-500">Nota: Editar um item parcelado ou recorrente irá alterar apenas esta ocorrência específica.</p>
+                </div>
+                <div class="items-center px-4 py-3 mt-4 flex justify-end gap-3 bg-gray-50 -mx-5 -mb-5 rounded-b-md">
+                    <button id="cancel-edit-btn" type="button" class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Cancelar
+                    </button>
+                    <button id="confirm-edit-btn" type="submit" class="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- ELEMENTOS DO DOM ---
+            const loginOverlay = document.getElementById('login-overlay');
+            const appContainer = document.getElementById('app-container');
+            const loginForm = document.getElementById('login-form');
+            const usernameInput = document.getElementById('username-input');
+            const usersList = document.getElementById('users-list');
+            const logoutBtn = document.getElementById('logout-btn');
+            const currentUserDisplay = document.getElementById('current-user-display');
+            
+            const expenseForm = document.getElementById('expense-form');
+            const incomeForm = document.getElementById('income-form');
+            const salaryInput = document.getElementById('salary');
+            const expenseList = document.getElementById('expense-list');
+            const emptyState = document.getElementById('empty-state');
+            const futureProjectionEl = document.getElementById('future-projection');
+            const currentMonthDisplay = document.getElementById('current-month-display');
+            const prevMonthBtn = document.getElementById('prev-month-btn');
+            const nextMonthBtn = document.getElementById('next-month-btn');
+            const importBtn = document.getElementById('import-btn');
+            const exportBtn = document.getElementById('export-btn');
+            const importFileInput = document.getElementById('import-file-input');
+            const tabLancamentos = document.getElementById('tab-lancamentos');
+            const tabRelatorio = document.getElementById('tab-relatorio');
+            const tabAnalise = document.getElementById('tab-analise');
+            const contentLancamentos = document.getElementById('content-lancamentos');
+            const contentRelatorio = document.getElementById('content-relatorio');
+            const contentAnalise = document.getElementById('content-analise');
+            const annualReportContainer = document.getElementById('annual-report');
+            const totalIncomeMonthEl = document.getElementById('total-income-month');
+            const totalExpenseMonthEl = document.getElementById('total-expense-month');
+            const balanceMonthEl = document.getElementById('balance-month');
+            const incomeList = document.getElementById('income-list');
+            const emptyStateIncome = document.getElementById('empty-state-income');
+            const monthFilterContainer = document.getElementById('month-filter-container');
+            const typeFixedRadio = document.getElementById('type-fixed');
+            const typeMonthlyRadio = document.getElementById('type-monthly');
+            const amountLabel = document.getElementById('amount-label');
+            const installmentsLabel = document.getElementById('installments-label');
+            const resetBtn = document.getElementById('reset-btn');
+            const resetModal = document.getElementById('reset-modal');
+            const confirmResetBtn = document.getElementById('confirm-reset-btn');
+            const cancelResetBtn = document.getElementById('cancel-reset-btn');
+            const geminiAnalysisBtn = document.getElementById('gemini-analysis-btn');
+            const geminiLoading = document.getElementById('gemini-loading');
+            const geminiResponseContainer = document.getElementById('gemini-response-container');
+            const editModal = document.getElementById('edit-modal');
+            const editForm = document.getElementById('edit-form');
+            const cancelEditBtn = document.getElementById('cancel-edit-btn');
+            const editModalTitle = document.getElementById('edit-modal-title');
+            const editCategoryContainer = document.getElementById('edit-category-container');
+            const deleteMonthBtn = document.getElementById('delete-month-btn');
+            const deleteMonthModal = document.getElementById('delete-month-modal');
+            const confirmDeleteMonthBtn = document.getElementById('confirm-delete-month-btn');
+            const cancelDeleteMonthBtn = document.getElementById('cancel-delete-month-btn');
+            const deleteMonthNameSpan = document.getElementById('delete-month-name');
+            const deleteRecurringModal = document.getElementById('delete-recurring-modal');
+            const deleteOneBtn = document.getElementById('delete-one-btn');
+            const deleteAllFutureBtn = document.getElementById('delete-all-future-btn');
+            const cancelDeleteRecurringBtn = document.getElementById('cancel-delete-recurring-btn');
+
+            // --- ESTADO DA APLICAÇÃO ---
+            let currentUser = null;
+            let users = [];
+            let annualChart = null;
+            let categoryChart = null;
+            let selectedMonths = null;
+            let editingItem = { id: null, type: null };
+            let itemToDelete = { id: null, type: null };
+            let expenses = [];
+            let incomes = [];
+            let salary = 0;
+            let currentDate = new Date('2025-10-01T12:00:00');
+            currentDate.setDate(1);
+
+             // --- LÓGICA DE LOGIN ---
+
+            const loadUsers = () => {
+                users = JSON.parse(localStorage.getItem('app_users')) || [];
+                usersList.innerHTML = '';
+                users.forEach(user => {
+                    const userButton = document.createElement('button');
+                    userButton.className = 'bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg hover:bg-gray-300';
+                    userButton.textContent = user;
+                    userButton.onclick = () => login(user);
+                    usersList.appendChild(userButton);
+                });
+            };
+
+            const saveUsers = () => {
+                localStorage.setItem('app_users', JSON.stringify(users));
+            };
+
+            const login = (username) => {
+                if (!username) return;
+                currentUser = username.trim();
+
+                if (!users.includes(currentUser)) {
+                    users.push(currentUser);
+                    saveUsers();
+                }
+
+                sessionStorage.setItem('currentUser', currentUser);
+                initializeApp();
+            };
+
+            const logout = () => {
+                sessionStorage.removeItem('currentUser');
+                location.reload();
+            };
+
+            const initializeApp = () => {
+                loginOverlay.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                currentUserDisplay.textContent = currentUser;
+                loadUserData();
+                renderAll();
+            };
+
+            // --- LÓGICA DE DADOS POR UTILIZADOR ---
+
+            const loadUserData = () => {
+                const userData = JSON.parse(localStorage.getItem(`data_${currentUser}`));
+                if (userData) {
+                    expenses = userData.expenses || [];
+                    incomes = userData.incomes || [];
+                    salary = userData.salary || 0;
+                } else {
+                    expenses = generateDefaultExpenses();
+                    incomes = [];
+                    salary = 0;
+                }
+                salaryInput.value = salary > 0 ? salary : '';
+            };
+            
+            const saveData = () => {
+                if (!currentUser) return;
+                const userData = { expenses, incomes, salary };
+                localStorage.setItem(`data_${currentUser}`, JSON.stringify(userData));
+            };
+            
+            // --- FUNÇÕES AUXILIARES E DE GERAÇÃO DE DADOS ---
+
+            const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const formatMonthYear = (date) => date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+            const getISODate = (date) => date.toISOString().split('T')[0];
+
+            const generateDefaultExpenses = () => {
+                const defaultData = [];
+                const addRecurring = (description, amount, category, start, months) => {
+                    const startDate = new Date(start);
+                    for (let i = 0; i < months; i++) {
+                        const date = new Date(startDate);
+                        date.setUTCMonth(startDate.getUTCMonth() + i);
+                        defaultData.push({ id: `pre_${description.replace(/\s/g, '')}_${i}`, description: `${description}`, amount, category, date: getISODate(date) });
+                    }
+                };
+                const baseDate = '2025-10-01T12:00:00Z';
+                defaultData.push({ id: 'pre_rener_1', description: 'Rener', amount: 200.00, category: 'Compras', date: '2025-10-01'});
+                defaultData.push({ id: 'pre_rener_2', description: 'Rener', amount: 200.00, category: 'Compras', date: '2025-11-01'});
+                defaultData.push({ id: 'pre_maodeobrawelton_1', description: 'Mão de Obra Welton', amount: 316.66, category: 'Outros', date: '2025-10-01'});
+                defaultData.push({ id: 'pre_maodeobrawelton_2', description: 'Mão de Obra Welton', amount: 316.66, category: 'Outros', date: '2025-11-01'});
+                defaultData.push({ id: 'pre_maerecarga_1', description: 'Mae Recarga', amount: 31.21, category: 'Moradia', date: '2025-10-01'});
+                addRecurring('Acordo Tia Miciada', 48.47, 'Moradia', baseDate, 12);
+                addRecurring('Acordo Condominio', 417.00, 'Moradia', baseDate, 6);
+                addRecurring('Condominio', 500.00, 'Moradia', baseDate, 12);
+                addRecurring('Apartamento', 1296.35, 'Moradia', baseDate, 12);
+                addRecurring('Netflix', 25.00, 'Lazer', baseDate, 12);
+                addRecurring('Mistura', 300.00, 'Alimentação', baseDate, 12);
+                addRecurring('Luz', 185.00, 'Moradia', baseDate, 12);
+                addRecurring('Condução Mensal', 124.80, 'Transporte', baseDate, 12);
+                addRecurring('Plano Vivo', 47.00, 'Moradia', baseDate, 12);
+                addRecurring('Internet', 100.00, 'Moradia', baseDate, 12);
+                addRecurring('Medicamento', 120.00, 'Saúde', '2025-11-01T12:00:00Z', 11);
+                return defaultData;
+            };
+            
+
+            // --- FUNÇÕES DE RENDERIZAÇÃO ---
+            const renderAll = () => {
+                renderMonthDisplay();
+                renderMonthlyBreakdown();
+                renderCategoryChart();
+                renderProjection();
+                renderAnnualReport();
+            };
+
+            const renderMonthDisplay = () => {
+                const monthName = formatMonthYear(currentDate);
+                currentMonthDisplay.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+            };
+
+            const renderMonthlyBreakdown = () => {
+                expenseList.innerHTML = '';
+                const filteredExpenses = expenses.filter(exp => {
+                    const expDate = new Date(exp.date + 'T00:00:00');
+                    return expDate.getFullYear() === currentDate.getFullYear() && expDate.getMonth() === currentDate.getMonth();
+                });
+                
+                if (filteredExpenses.length === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                    filteredExpenses.sort((a,b) => a.description.localeCompare(b.description)).forEach(expense => {
+                        const expenseItem = document.createElement('div');
+                        expenseItem.className = 'expense-item flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-200';
+                        expenseItem.innerHTML = `<div class="flex items-center gap-4"><div class="text-sm"><p class="font-semibold text-gray-800">${expense.description}</p><p class="text-gray-500">${expense.category}</p></div></div>
+                        <div class="flex items-center gap-4">
+                            <p class="font-semibold text-gray-900 text-right">${formatCurrency(expense.amount)}</p>
+                            <div class="action-buttons flex items-center">
+                                <button onclick="openEditModal('expense', '${expense.id}')" title="Editar" class="p-1 rounded-full hover:bg-gray-200 transition text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button>
+                                <button onclick="deleteItem('expense', '${expense.id}')" title="Apagar" class="p-1 rounded-full hover:bg-gray-200 transition text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button>
+                            </div>
+                        </div>`;
+                        expenseList.appendChild(expenseItem);
+                    });
+                }
+
+                incomeList.innerHTML = '';
+                const filteredIncomes = incomes.filter(inc => {
+                    const incDate = new Date(inc.date + 'T00:00:00');
+                    return incDate.getFullYear() === currentDate.getFullYear() && incDate.getMonth() === currentDate.getMonth();
+                });
+
+                if (filteredIncomes.length === 0) {
+                    emptyStateIncome.style.display = 'block';
+                } else {
+                    emptyStateIncome.style.display = 'none';
+                    filteredIncomes.sort((a,b) => a.description.localeCompare(b.description)).forEach(income => {
+                        const incomeItem = document.createElement('div');
+                        incomeItem.className = 'expense-item flex items-center justify-between bg-green-50 p-4 rounded-lg border border-green-200';
+                        incomeItem.innerHTML = `<div class="flex items-center gap-4"><div class="text-sm"><p class="font-semibold text-gray-800">${income.description}</p></div></div>
+                        <div class="flex items-center gap-4">
+                            <p class="font-semibold text-green-700 text-right">${formatCurrency(income.amount)}</p>
+                            <div class="action-buttons flex items-center">
+                                <button onclick="openEditModal('income', '${income.id}')" title="Editar" class="p-1 rounded-full hover:bg-gray-200 transition text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg></button>
+                                <button onclick="deleteItem('income', '${income.id}')" title="Apagar" class="p-1 rounded-full hover:bg-gray-200 transition text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button>
+                            </div>
+                        </div>`;
+                        incomeList.appendChild(incomeItem);
+                    });
+                }
+                
+                const totalExpenses = filteredExpenses.reduce((acc, expense) => acc + expense.amount, 0);
+                const totalOtherIncomes = filteredIncomes.reduce((acc, income) => acc + income.amount, 0);
+                const totalIncomes = (salary || 0) + totalOtherIncomes;
+                const balance = totalIncomes - totalExpenses;
+
+                totalIncomeMonthEl.textContent = formatCurrency(totalIncomes);
+                totalExpenseMonthEl.textContent = formatCurrency(totalExpenses);
+                balanceMonthEl.textContent = formatCurrency(balance);
+            };
+
+            const renderCategoryChart = () => {
+                const chartCanvas = document.getElementById('category-chart');
+                if (!chartCanvas) return;
+                const ctx = chartCanvas.getContext('2d');
+
+                const filteredExpenses = expenses.filter(exp => {
+                    const expDate = new Date(exp.date + 'T00:00:00');
+                    return expDate.getFullYear() === currentDate.getFullYear() && expDate.getMonth() === currentDate.getMonth();
+                });
+
+                if (categoryChart) {
+                    categoryChart.destroy();
+                }
+
+                if (filteredExpenses.length === 0) {
+                    ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#6b7280'; // gray-500
+                    ctx.font = "16px 'Inter'";
+                    ctx.fillText('Nenhum dado de gasto para este mês.', chartCanvas.width / 2, chartCanvas.height / 2);
+                    ctx.restore();
+                    return;
+                }
+
+                const expensesByCategory = filteredExpenses.reduce((acc, exp) => {
+                    acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
+                    return acc;
+                }, {});
+
+                const labels = Object.keys(expensesByCategory);
+                const data = Object.values(expensesByCategory);
+
+                const backgroundColors = [
+                    'rgba(59, 130, 246, 0.7)', 'rgba(239, 68, 68, 0.7)', 'rgba(245, 158, 11, 0.7)',
+                    'rgba(16, 185, 129, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(236, 72, 153, 0.7)',
+                    'rgba(107, 114, 128, 0.7)'
+                ];
+                
+                while (backgroundColors.length < labels.length) {
+                    backgroundColors.push(`rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.7)`);
+                }
+
+                categoryChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Gastos por Categoria',
+                            data: data,
+                            backgroundColor: backgroundColors,
+                            borderColor: '#fff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(2) + '%' : '0%';
+                                        return `${label}: ${formatCurrency(value)} (${percentage})`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+            
+            const renderProjection = () => {
+                futureProjectionEl.innerHTML = '';
+                if (salary <= 0) {
+                    futureProjectionEl.innerHTML = `<p class="text-sm text-gray-500">Informe seu salário para ver a projeção.</p>`;
+                    return;
+                }
+                for (let i = 0; i < 6; i++) {
+                    const projectionDate = new Date(currentDate);
+                    projectionDate.setMonth(currentDate.getMonth() + i);
+                    
+                    const monthlyExpenses = expenses.filter(exp => { const d = new Date(exp.date + 'T00:00:00'); return d.getFullYear() === projectionDate.getFullYear() && d.getMonth() === projectionDate.getMonth(); }).reduce((s, e) => s + e.amount, 0);
+                    const monthlyIncomes = incomes.filter(inc => { const d = new Date(inc.date + 'T00:00:00'); return d.getFullYear() === projectionDate.getFullYear() && d.getMonth() === projectionDate.getMonth(); }).reduce((s, i) => s + i.amount, 0);
+                    
+                    const totalIncome = (salary || 0) + monthlyIncomes;
+                    const balance = totalIncome - monthlyExpenses;
+                    const balanceColor = balance >= 0 ? 'text-green-600' : 'text-red-600';
+                    const projectionItem = document.createElement('div');
+                    projectionItem.className = 'flex justify-between items-center text-sm p-2 rounded ' + (i === 0 ? 'bg-blue-100' : '');
+                    projectionItem.innerHTML = `<span class="font-medium text-gray-700">${formatMonthYear(projectionDate)}</span><div class="flex gap-4 items-center"><span class="text-gray-500">${formatCurrency(monthlyExpenses)}</span><span class="font-bold w-24 text-right ${balanceColor}">${formatCurrency(balance)}</span></div>`;
+                    futureProjectionEl.appendChild(projectionItem);
+                }
+            };
+
+            const renderAnnualChart = (labels, expenseData, incomeData) => {
+                const chartCanvas = document.getElementById('annual-chart');
+                if (!chartCanvas) return;
+                const ctx = chartCanvas.getContext('2d');
+                if (annualChart) {
+                    annualChart.destroy();
+                }
+                annualChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Receita Entrante',
+                                data: incomeData,
+                                borderColor: 'rgba(34, 197, 94, 1)',
+                                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                fill: true,
+                                tension: 0.3,
+                            },
+                            {
+                                label: 'Previsto de Contas',
+                                data: expenseData,
+                                borderColor: 'rgba(239, 68, 68, 1)',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                fill: true,
+                                tension: 0.3,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, ticks: { callback: (value) => 'R$ ' + value.toLocaleString('pt-BR') } } },
+                        plugins: { tooltip: { callbacks: { label: (context) => `${context.dataset.label || ''}: ${formatCurrency(context.parsed.y)}` } } }
+                    }
+                });
+            };
+            
+            const renderAnnualReport = () => {
+                const allItems = [...expenses, ...incomes];
+                const chartCanvasContainer = document.getElementById('annual-chart').parentElement;
+                
+                if (allItems.length === 0) {
+                    annualReportContainer.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum dado para exibir no relatório.</p>';
+                    chartCanvasContainer.style.display = 'none';
+                    monthFilterContainer.parentElement.style.display = 'none';
+                    return;
+                }
+                chartCanvasContainer.style.display = 'block';
+                monthFilterContainer.parentElement.style.display = 'block';
+
+                const allUniqueMonths = [...new Set(allItems.map(item => item.date.substring(0, 7)))].sort();
+                
+                if (selectedMonths === null) {
+                    selectedMonths = new Set(allUniqueMonths);
+                }
+
+                monthFilterContainer.innerHTML = '';
+                const monthNamesForFilter = allUniqueMonths.map(monthStr => {
+                    const [year, month] = monthStr.split('-');
+                    return { value: monthStr, name: new Date(year, month - 1, 1).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }) };
+                });
+
+                monthNamesForFilter.forEach(({ value, name }) => {
+                    const isChecked = selectedMonths.has(value);
+                    const filterItem = document.createElement('div');
+                    filterItem.className = 'flex items-center';
+                    filterItem.innerHTML = `<input id="filter-${value}" type="checkbox" value="${value}" ${isChecked ? 'checked' : ''} class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"><label for="filter-${value}" class="ml-2 block text-sm text-gray-900">${name}</label>`;
+                    monthFilterContainer.appendChild(filterItem);
+                    filterItem.querySelector('input').addEventListener('change', (e) => {
+                        if (e.target.checked) { selectedMonths.add(e.target.value); } else { selectedMonths.delete(e.target.value); }
+                        renderAnnualReport();
+                    });
+                });
+                
+                const monthlyTotals = {};
+                allUniqueMonths.forEach(month => { monthlyTotals[month] = { income: salary || 0, expense: 0 }; });
+                expenses.forEach(exp => { monthlyTotals[exp.date.substring(0, 7)].expense += exp.amount; });
+                incomes.forEach(inc => { 
+                    const monthKey = inc.date.substring(0, 7);
+                    if (monthlyTotals[monthKey]) { monthlyTotals[monthKey].income += inc.amount; }
+                });
+
+                const filteredMonths = allUniqueMonths.filter(m => selectedMonths.has(m));
+                const chartLabels = filteredMonths.map(monthStr => monthNamesForFilter.find(m => m.value === monthStr).name);
+                const chartExpenseData = filteredMonths.map(month => monthlyTotals[month]?.expense || 0);
+                const chartIncomeData = filteredMonths.map(month => monthlyTotals[month]?.income || 0);
+                renderAnnualChart(chartLabels, chartExpenseData, chartIncomeData);
+
+                const uniqueDescriptions = [...new Set(expenses.map(exp => exp.description))].sort();
+                const pivotData = {};
+                uniqueDescriptions.forEach(desc => { pivotData[desc] = {}; allUniqueMonths.forEach(month => { pivotData[desc][month] = 0; }); });
+                expenses.forEach(exp => { if (pivotData[exp.description]) { pivotData[exp.description][exp.date.substring(0, 7)] += exp.amount; } });
+                
+                const monthHeaders = allUniqueMonths.map(monthStr => monthNamesForFilter.find(m => m.value === monthStr).name);
+
+                let tableHTML = `<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                    ${monthHeaders.map(h => `<th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">${h}</th>`).join('')}
+                </tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
+
+                uniqueDescriptions.forEach(desc => {
+                    tableHTML += `<tr><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${desc}</td>`;
+                    allUniqueMonths.forEach(month => {
+                        const value = pivotData[desc][month];
+                        tableHTML += `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">${value > 0 ? formatCurrency(value) : '-'}</td>`;
+                    });
+                    tableHTML += '</tr>';
+                });
+
+                tableHTML += `<tr class="bg-gray-100 font-bold"><td class="px-6 py-4 text-sm">Total Despesas</td>${allUniqueMonths.map(m => `<td class="px-6 py-4 text-sm text-right">${formatCurrency(monthlyTotals[m].expense)}</td>`).join('')}</tr>`;
+                tableHTML += `<tr class="bg-green-50 font-bold"><td class="px-6 py-4 text-sm">Total Receitas</td>${allUniqueMonths.map(m => `<td class="px-6 py-4 text-sm text-green-700 text-right">${formatCurrency(monthlyTotals[m].income)}</td>`).join('')}</tr>`;
+                tableHTML += `<tr class="bg-blue-50 font-bold"><td class="px-6 py-4 text-sm">Saldo</td>${allUniqueMonths.map(m => { const b = monthlyTotals[m].income - monthlyTotals[m].expense; return `<td class="px-6 py-4 text-sm text-right ${b >= 0 ? 'text-blue-700' : 'text-red-600'}">${formatCurrency(b)}</td>` }).join('')}</tr>`;
+                tableHTML += `</tbody></table>`;
+                annualReportContainer.innerHTML = tableHTML;
+            };
+
+            // MANIPULADORES DE EVENTOS
+            const handleAddExpense = (event) => {
+                event.preventDefault();
+                const expenseType = document.querySelector('input[name="expense-type"]:checked').value;
+                const description = document.getElementById('description').value;
+                const amountInput = parseFloat(document.getElementById('amount').value);
+                let installments = parseInt(document.getElementById('installments').value);
+                const category = document.getElementById('category').value;
+                const startDate = new Date(document.getElementById('date').value + 'T00:00:00-03:00');
+
+                if (!description || isNaN(amountInput) || amountInput <= 0) {
+                    alert('Por favor, preencha a descrição e o valor corretamente.');
+                    return;
+                }
+
+                let installmentAmount;
+                let numberOfInstallments;
+                let isRecurringIndefinite = false;
+
+                if (expenseType === 'fixed') {
+                    if (isNaN(installments) || installments <= 0) {
+                        installmentAmount = amountInput;
+                        numberOfInstallments = 36;
+                        isRecurringIndefinite = true;
+                    } else {
+                        installmentAmount = amountInput / installments;
+                        numberOfInstallments = installments;
+                    }
+                } else { // 'monthly'
+                    if (isNaN(installments) || installments <= 0) {
+                        alert('Para o tipo "Mensal", por favor, informe a Quantidade de Meses.');
+                        return;
+                    }
+                    installmentAmount = amountInput;
+                    numberOfInstallments = installments;
+                }
+
+                for (let i = 0; i < numberOfInstallments; i++) {
+                    const expenseDate = new Date(startDate);
+                    expenseDate.setMonth(startDate.getMonth() + i);
+
+                    let loopDescription = description;
+                    if (!isRecurringIndefinite && numberOfInstallments > 1) {
+                        loopDescription = `${description} (${i + 1}/${numberOfInstallments})`;
+                    }
+                    
+                    expenses.push({
+                        id: 'exp_' + Date.now() + Math.random(),
+                        description: loopDescription,
+                        amount: installmentAmount,
+                        category,
+                        date: getISODate(expenseDate)
+                    });
+                }
+
+                expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+                saveData();
+                renderAll();
+                expenseForm.reset();
+                document.getElementById('date').value = getISODate(new Date());
+                updateExpenseFormLabels();
+            };
+            
+            const handleAddIncome = (event) => {
+                event.preventDefault();
+                const description = document.getElementById('income-description').value;
+                const amount = parseFloat(document.getElementById('income-amount').value);
+                const date = document.getElementById('income-date').value;
+                if (!description || isNaN(amount) || amount <= 0 || !date) { alert('Por favor, preencha a receita corretamente.'); return; }
+                incomes.push({ id: 'inc_' + Date.now() + Math.random(), description, amount, date });
+                incomes.sort((a, b) => new Date(b.date) - new Date(a.date));
+                saveData(); 
+                renderAll(); 
+                incomeForm.reset(); 
+                document.getElementById('income-date').value = getISODate(new Date());
+            };
+
+            const handleSalaryChange = (event) => { 
+                salary = parseFloat(event.target.value) || 0; 
+                saveData(); 
+                renderAll(); 
+            };
+            
+            window.deleteItem = (type, id) => {
+                const item = type === 'expense' ? expenses.find(i => i.id === id) : incomes.find(i => i.id === id);
+                if (!item) return;
+
+                const baseDescription = item.description.replace(/\s\(\d+\/\d+\)$/, '').trim();
+                const similarItems = expenses.filter(e => e.description.startsWith(baseDescription) && e.description.replace(/\s\(\d+\/\d+\)$/, '').trim() === baseDescription);
+
+                if (type === 'expense' && similarItems.length > 1) {
+                    itemToDelete = { type, id };
+                    deleteRecurringModal.classList.remove('hidden');
+                } else {
+                    if (confirm(`Tem a certeza que quer apagar "${item.description}"?`)) {
+                        if (type === 'expense') {
+                            expenses = expenses.filter(i => i.id !== id);
+                        } else {
+                            incomes = incomes.filter(i => i.id !== id);
+                        }
+                        saveData();
+                        renderAll();
+                    }
+                }
+            };
+            
+            const handleReset = () => {
+                expenses = [];
+                incomes = [];
+                salary = 0;
+                salaryInput.value = '';
+                saveData();
+                resetModal.classList.add('hidden');
+                renderAll();
+            };
+
+            const goToPrevMonth = () => { currentDate.setMonth(currentDate.getMonth() - 1); renderAll(); };
+            const goToNextMonth = () => { currentDate.setMonth(currentDate.getMonth() + 1); renderAll(); };
+            const handleExport = () => {
+                const dataToExport = { salary, expenses, incomes }; const dataStr = JSON.stringify(dataToExport, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a'); link.href = url; link.download = `dados-financeiros-${getISODate(new Date())}.json`;
+                document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+            };
+            const handleImport = () => { importFileInput.click(); };
+            const handleFileSelected = (event) => {
+                const file = event.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (data.salary) salary = parseFloat(data.salary) || 0;
+                        if (Array.isArray(data.expenses)) {
+                            const existingExpenseIds = new Set(expenses.map(exp => exp.id));
+                            const newExpenses = data.expenses.filter(exp => !existingExpenseIds.has(exp.id)); expenses.push(...newExpenses);
+                        }
+                        if (Array.isArray(data.incomes)) {
+                            const existingIncomeIds = new Set(incomes.map(inc => inc.id));
+                            const newIncomes = data.incomes.filter(inc => !existingIncomeIds.has(inc.id)); incomes.push(...newIncomes);
+                        }
+                        expenses.sort((a, b) => new Date(b.date) - new Date(a.date)); incomes.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        saveData(); salaryInput.value = salary > 0 ? salary : ''; renderAll(); alert(`Dados importados com sucesso!`);
+                    } catch (error) { alert('Erro ao ler o arquivo: ' + error.message); } 
+                    finally { importFileInput.value = ''; }
+                };
+                reader.readAsText(file);
+            };
+            
+            const switchTab = (tab) => {
+                contentLancamentos.classList.add('hidden');
+                contentRelatorio.classList.add('hidden');
+                contentAnalise.classList.add('hidden');
+                tabLancamentos.classList.remove('active');
+                tabRelatorio.classList.remove('active');
+                tabAnalise.classList.remove('active');
+
+                if (tab === 'relatorio') {
+                    contentRelatorio.classList.remove('hidden');
+                    tabRelatorio.classList.add('active');
+                    renderAnnualReport();
+                } else if (tab === 'analise') {
+                    contentAnalise.classList.remove('hidden');
+                    tabAnalise.classList.add('active');
+                } else {
+                    contentLancamentos.classList.remove('hidden');
+                    tabLancamentos.classList.add('active');
+                }
+            };
+            
+            const updateExpenseFormLabels = () => {
+                if (typeMonthlyRadio.checked) {
+                    amountLabel.textContent = 'Valor da Parcela Mensal (R$)';
+                    installmentsLabel.textContent = 'Quantidade de Meses';
+                    document.getElementById('installments').placeholder = "Ex: 12";
+                } else {
+                    amountLabel.textContent = 'Valor Total (R$)';
+                    installmentsLabel.textContent = 'Nº de Parcelas';
+                    document.getElementById('installments').placeholder = "Vazio para despesa contínua";
+                }
+            };
+
+            const simpleMarkdownToHtml = (text) => {
+                let html = text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+                
+                const lines = html.split('\n');
+                let inList = false;
+                html = '';
+
+                for (const line of lines) {
+                    if (line.trim().startsWith('- ')) {
+                        if (!inList) {
+                            html += '<ul>';
+                            inList = true;
+                        }
+                        html += `<li>${line.trim().substring(2)}</li>`;
+                    } else {
+                        if (inList) {
+                            html += '</ul>';
+                            inList = false;
+                        }
+                        if (line.trim().startsWith('#')) {
+                             html += `<h3>${line.trim().replace(/#/g, '')}</h3>`;
+                        } else if(line.trim().length > 0) {
+                            html += `<p>${line}</p>`;
+                        }
+                    }
+                }
+                if (inList) {
+                    html += '</ul>';
+                }
+                return `<div class="gemini-response text-gray-700 space-y-2">${html}</div>`;
+            };
+
+            const handleGeminiAnalysis = async () => {
+                geminiLoading.classList.remove('hidden');
+                geminiResponseContainer.innerHTML = '';
+                geminiAnalysisBtn.disabled = true;
+
+                const dataToAnalyze = {};
+                const today = new Date();
+                for (let i = 2; i >= 0; i--) {
+                    const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+                    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                    
+                    const monthlyExpenses = expenses.filter(exp => exp.date.startsWith(monthKey));
+                    const monthlyIncomes = incomes.filter(inc => inc.date.startsWith(monthKey));
+                    
+                    if (monthlyExpenses.length > 0 || monthlyIncomes.length > 0) {
+                        dataToAnalyze[monthKey] = {
+                            expenses: monthlyExpenses,
+                            incomes: monthlyIncomes
+                        };
+                    }
+                }
+                
+                if (Object.keys(dataToAnalyze).length === 0) {
+                    geminiResponseContainer.innerHTML = `<p class="text-center text-red-500">Não há dados suficientes nos últimos 3 meses para gerar uma análise.</p>`;
+                    geminiLoading.classList.add('hidden');
+                    geminiAnalysisBtn.disabled = false;
+                    return;
+                }
+
+                let userQuery = `Analisar os seguintes dados financeiros de um usuário no Brasil (valores em BRL). O salário mensal dele é ${formatCurrency(salary)}.\n\n`;
+
+                for (const monthKey in dataToAnalyze) {
+                    const [year, month] = monthKey.split('-');
+                    const monthName = new Date(year, month - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                    userQuery += `**${monthName.charAt(0).toUpperCase() + monthName.slice(1)}:**\n`;
+                    
+                    const expensesByCategory = dataToAnalyze[monthKey].expenses.reduce((acc, exp) => {
+                        acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
+                        return acc;
+                    }, {});
+
+                    const totalMonthExpenses = dataToAnalyze[monthKey].expenses.reduce((sum, exp) => sum + exp.amount, 0);
+                    const totalMonthIncomes = dataToAnalyze[monthKey].incomes.reduce((sum, inc) => sum + inc.amount, 0) + salary;
+
+                    userQuery += `- Receita Total: ${formatCurrency(totalMonthIncomes)}\n`;
+                    userQuery += `- Despesa Total: ${formatCurrency(totalMonthExpenses)}\n`;
+                    userQuery += `- Gastos por Categoria:\n`;
+                    for(const category in expensesByCategory) {
+                        userQuery += `  - ${category}: ${formatCurrency(expensesByCategory[category])}\n`;
+                    }
+                    userQuery += `\n`;
+                }
+
+                const systemPrompt = "Aja como um consultor financeiro amigável e prestativo. Analise os dados de despesas e receitas a seguir e forneça um resumo claro, identifique tendências de gastos e ofereça 3 dicas práticas e acionáveis para ajudar o usuário a economizar dinheiro. Formate a resposta usando markdown, com títulos e listas.";
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+                
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    },
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Erro na API: ${response.statusText}`);
+                    }
+                    
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        const generatedText = candidate.content.parts[0].text;
+                        geminiResponseContainer.innerHTML = simpleMarkdownToHtml(generatedText);
+                    } else {
+                        throw new Error("Resposta da API inválida ou vazia.");
+                    }
+
+                } catch (error) {
+                    console.error("Erro ao chamar a API Gemini:", error);
+                    geminiResponseContainer.innerHTML = `<p class="text-center text-red-500">Ocorreu um erro ao gerar a análise. Por favor, tente novamente mais tarde.</p>`;
+                } finally {
+                    geminiLoading.classList.add('hidden');
+                    geminiAnalysisBtn.disabled = false;
+                }
+            };
+            
+            const closeEditModal = () => {
+                editingItem = { id: null, type: null };
+                editModal.classList.add('hidden');
+            };
+
+            window.openEditModal = (type, id) => {
+                editingItem.id = id;
+                editingItem.type = type;
+
+                const item = type === 'expense'
+                    ? expenses.find(i => i.id === id)
+                    : incomes.find(i => i.id === id);
+
+                if (!item) return;
+
+                document.getElementById('edit-description').value = item.description;
+                document.getElementById('edit-amount').value = item.amount;
+                document.getElementById('edit-date').value = item.date;
+
+                if (type === 'expense') {
+                    editModalTitle.textContent = "Editar Gasto";
+                    editCategoryContainer.style.display = 'block';
+                    document.getElementById('edit-category').value = item.category;
+                } else {
+                    editModalTitle.textContent = "Editar Receita";
+                    editCategoryContainer.style.display = 'none';
+                }
+                
+                editModal.classList.remove('hidden');
+            };
+
+            const handleEditSubmit = (event) => {
+                event.preventDefault();
+                const { id, type } = editingItem;
+                if (!id || !type) return;
+
+                const list = type === 'expense' ? expenses : incomes;
+                const itemIndex = list.findIndex(i => i.id === id);
+
+                if (itemIndex === -1) return;
+
+                list[itemIndex].description = document.getElementById('edit-description').value;
+                list[itemIndex].amount = parseFloat(document.getElementById('edit-amount').value);
+                list[itemIndex].date = document.getElementById('edit-date').value;
+
+                if (type === 'expense') {
+                    list[itemIndex].category = document.getElementById('edit-category').value;
+                }
+
+                saveData();
+                renderAll();
+                closeEditModal();
+            };
+
+            const closeDeleteRecurringModal = () => {
+                itemToDelete = { id: null, type: null };
+                deleteRecurringModal.classList.add('hidden');
+            };
+
+            // --- INICIALIZAÇÃO E EVENT LISTENERS ---
+            
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                login(usernameInput.value);
+            });
+
+            logoutBtn.addEventListener('click', logout);
+            
+            const sessionUser = sessionStorage.getItem('currentUser');
+            if (sessionUser) {
+                currentUser = sessionUser;
+                initializeApp();
+            } else {
+                loadUsers();
+            }
+
+            // O resto dos event listeners
+            expenseForm.addEventListener('submit', handleAddExpense);
+            incomeForm.addEventListener('submit', handleAddIncome);
+            salaryInput.addEventListener('change', handleSalaryChange);
+            prevMonthBtn.addEventListener('click', goToPrevMonth);
+            nextMonthBtn.addEventListener('click', goToNextMonth);
+            exportBtn.addEventListener('click', handleExport);
+            importBtn.addEventListener('click', handleImport);
+            importFileInput.addEventListener('change', handleFileSelected);
+            tabLancamentos.addEventListener('click', () => switchTab('lancamentos'));
+            tabRelatorio.addEventListener('click', () => switchTab('relatorio'));
+            tabAnalise.addEventListener('click', () => switchTab('analise'));
+            typeFixedRadio.addEventListener('change', updateExpenseFormLabels);
+            typeMonthlyRadio.addEventListener('change', updateExpenseFormLabels);
+            resetBtn.addEventListener('click', () => resetModal.classList.remove('hidden'));
+            cancelResetBtn.addEventListener('click', () => resetModal.classList.add('hidden'));
+            confirmResetBtn.addEventListener('click', handleReset);
+            geminiAnalysisBtn.addEventListener('click', handleGeminiAnalysis);
+            editForm.addEventListener('submit', handleEditSubmit);
+            cancelEditBtn.addEventListener('click', closeEditModal);
+
+            deleteMonthBtn.addEventListener('click', () => {
+                deleteMonthNameSpan.textContent = formatMonthYear(currentDate);
+                deleteMonthModal.classList.remove('hidden');
+            });
+            cancelDeleteMonthBtn.addEventListener('click', () => {
+                deleteMonthModal.classList.add('hidden');
+            });
+            confirmDeleteMonthBtn.addEventListener('click', () => {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+                expenses = expenses.filter(exp => {
+                    const expDate = new Date(exp.date + 'T00:00:00');
+                    return expDate.getFullYear() !== year || expDate.getMonth() !== month;
+                });
+                incomes = incomes.filter(inc => {
+                    const incDate = new Date(inc.date + 'T00:00:00');
+                    return incDate.getFullYear() !== year || incDate.getMonth() !== month;
+                });
+                saveData();
+                renderAll();
+                deleteMonthModal.classList.add('hidden');
+            });
+
+            deleteOneBtn.addEventListener('click', () => {
+                const { type, id } = itemToDelete;
+                if (type === 'expense') {
+                    expenses = expenses.filter(i => i.id !== id);
+                }
+                saveData();
+                renderAll();
+                closeDeleteRecurringModal();
+            });
+
+            deleteAllFutureBtn.addEventListener('click', () => {
+                const { type, id } = itemToDelete;
+                if (type !== 'expense') return;
+
+                const item = expenses.find(i => i.id === id);
+                if (!item) return;
+
+                const baseDescription = item.description.replace(/\s\(\d+\/\d+\)$/, '').trim();
+                const itemDate = new Date(item.date + 'T00:00:00');
+
+                expenses = expenses.filter(exp => {
+                    const expBaseDescription = exp.description.replace(/\s\(\d+\/\d+\)$/, '').trim();
+                    const expDate = new Date(exp.date + 'T00:00:00');
+                    return expBaseDescription !== baseDescription || expDate < itemDate;
+                });
+
+                saveData();
+                renderAll();
+                closeDeleteRecurringModal();
+            });
+
+            cancelDeleteRecurringBtn.addEventListener('click', closeDeleteRecurringModal);
+        });
+    </script>
+</body>
+</html>
+
