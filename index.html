@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Gastos Avançado</title>
+    <title>Controle de Gastos AvanÃ§ado</title>
     
     <!-- Meta tags para PWA -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -95,18 +95,18 @@
             <div id="existing-users-container" class="mt-6">
                 <h3 class="text-sm font-medium text-gray-500 mb-2">Ou selecione um utilizador existente:</h3>
                 <div id="users-list" class="flex flex-wrap justify-center gap-2">
-                    <!-- Utilizadores existentes serão inseridos aqui -->
+                    <!-- Utilizadores existentes serÃ£o inseridos aqui -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Container Principal da Aplicação -->
+    <!-- Container Principal da AplicaÃ§Ã£o -->
     <div id="app-container" class="hidden">
         <div class="container mx-auto max-w-6xl p-4 sm:p-6 lg:p-8">
             <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-8">
                 
-                <!-- Cabeçalho -->
+                <!-- CabeÃ§alho -->
                 <div class="text-center mb-8 relative">
                     <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Controle de Gastos</h1>
                     <p class="text-gray-500 mt-2">Utilizador: <span id="current-user-display" class="font-semibold text-blue-600"></span></p>
@@ -115,47 +115,47 @@
                     </button>
                 </div>
                 
-                <!-- Navegação por Abas -->
+                <!-- NavegaÃ§Ã£o por Abas -->
                 <div class="mb-8 border-b border-gray-200">
                     <nav class="flex space-x-4 -mb-px" aria-label="Tabs">
                         <button id="tab-lancamentos" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-                            Lançamentos
+                            LanÃ§amentos
                         </button>
                         <button id="tab-relatorio" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-                            Relatório Anual
+                            RelatÃ³rio Anual
                         </button>
                         <button id="tab-analise" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-                            Análise Inteligente
+                            AnÃ¡lise Inteligente
                         </button>
                     </nav>
                 </div>
                 
-                <!-- Conteúdo da Aba Lançamentos -->
+                <!-- ConteÃºdo da Aba LanÃ§amentos -->
                 <div id="content-lancamentos">
-                    <!-- Resumo do Mês Selecionado -->
+                    <!-- Resumo do MÃªs Selecionado -->
                     <div id="summary-card" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                         <div class="bg-green-500 text-white p-6 rounded-xl shadow-md">
-                            <h2 class="text-lg font-medium text-green-200">Receitas do Mês</h2>
+                            <h2 class="text-lg font-medium text-green-200">Receitas do MÃªs</h2>
                             <p id="total-income-month" class="text-3xl font-bold mt-1">R$ 0,00</p>
                         </div>
                         <div class="bg-red-500 text-white p-6 rounded-xl shadow-md">
-                            <h2 class="text-lg font-medium text-red-200">Despesas do Mês</h2>
+                            <h2 class="text-lg font-medium text-red-200">Despesas do MÃªs</h2>
                             <p id="total-expense-month" class="text-3xl font-bold mt-1">R$ 0,00</p>
                         </div>
                         <div class="bg-blue-600 text-white p-6 rounded-xl shadow-md">
-                            <h2 class="text-lg font-medium text-blue-200">Saldo do Mês</h2>
+                            <h2 class="text-lg font-medium text-blue-200">Saldo do MÃªs</h2>
                             <p id="balance-month" class="text-3xl font-bold mt-1">R$ 0,00</p>
                         </div>
                     </div>
-                     <!-- Gráfico de Categorias do Mês -->
+                     <!-- GrÃ¡fico de Categorias do MÃªs -->
                     <div class="mb-8">
-                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Gastos por Categoria no Mês</h2>
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Gastos por Categoria no MÃªs</h2>
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-200" style="height: 350px; position: relative;">
                             <canvas id="category-chart"></canvas>
                         </div>
                     </div>
 
-                    <!-- Botões de Ação Rápida -->
+                    <!-- BotÃµes de AÃ§Ã£o RÃ¡pida -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                         <button id="add-expense-btn" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition flex items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" /></svg>
@@ -167,31 +167,31 @@
                         </button>
                     </div>
 
-                    <!-- Salário e Projeção Futura -->
+                    <!-- SalÃ¡rio e ProjeÃ§Ã£o Futura -->
                     <div class="mb-8">
-                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Salário & Projeção Futura</h2>
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">SalÃ¡rio & ProjeÃ§Ã£o Futura</h2>
                         <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                             <div class="mb-4">
-                                <label for="salary" class="block text-sm font-medium text-gray-600 mb-1">Seu Salário Mensal (R$)</label>
+                                <label for="salary" class="block text-sm font-medium text-gray-600 mb-1">Seu SalÃ¡rio Mensal (R$)</label>
                                 <input type="number" id="salary" step="0.01" min="0" placeholder="Ex: 3000,00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition">
                             </div>
                             <div id="future-projection" class="space-y-2">
-                                <!-- Projeção será inserida aqui via JS -->
+                                <!-- ProjeÃ§Ã£o serÃ¡ inserida aqui via JS -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Formulário para Adicionar Gasto -->
+                    <!-- FormulÃ¡rio para Adicionar Gasto -->
                     <div class="mb-8" id="add-expense-section">
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Adicionar Novo Gasto</h2>
                         <form id="expense-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end p-4 bg-gray-50 rounded-lg border">
                             <div class="col-span-1 sm:col-span-2">
-                                <label for="description" class="block text-sm font-medium text-gray-600 mb-1">Descrição</label>
+                                <label for="description" class="block text-sm font-medium text-gray-600 mb-1">DescriÃ§Ã£o</label>
                                 <input type="text" id="description" placeholder="Ex: Compra de Notebook" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition" required>
                             </div>
                             
                             <div class="col-span-1 sm:col-span-2 flex items-center gap-x-6">
-                                <label class="block text-sm font-medium text-gray-600">Tipo de Lançamento:</label>
+                                <label class="block text-sm font-medium text-gray-600">Tipo de LanÃ§amento:</label>
                                 <div class="flex items-center gap-x-4">
                                     <div class="flex items-center">
                                         <input id="type-fixed" name="expense-type" type="radio" value="fixed" class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500" checked>
@@ -209,21 +209,21 @@
                                 <input type="number" id="amount" step="0.01" min="0" placeholder="Ex: 1200,00" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition" required>
                             </div>
                              <div class="sm:col-span-1 col-span-2">
-                                <label for="installments" id="installments-label" class="block text-sm font-medium text-gray-600 mb-1">Nº de Parcelas</label>
-                                <input type="number" id="installments" min="1" placeholder="Vazio para despesa contínua" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition">
+                                <label for="installments" id="installments-label" class="block text-sm font-medium text-gray-600 mb-1">NÂº de Parcelas</label>
+                                <input type="number" id="installments" min="1" placeholder="Vazio para despesa contÃ­nua" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition">
                             </div>
                             <div>
-                                <label for="date" class="block text-sm font-medium text-gray-600 mb-1">Data da 1ª Parcela</label>
+                                <label for="date" class="block text-sm font-medium text-gray-600 mb-1">Data da 1Âª Parcela</label>
                                 <input type="date" id="date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition" required>
                             </div>
                             <div>
                                 <label for="category" class="block text-sm font-medium text-gray-600 mb-1">Categoria</label>
                                 <select id="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition bg-white">
-                                    <option value="Alimentação">Alimentação</option>
+                                    <option value="AlimentaÃ§Ã£o">AlimentaÃ§Ã£o</option>
                                     <option value="Transporte">Transporte</option>
                                     <option value="Moradia">Moradia</option>
                                     <option value="Lazer">Lazer</option>
-                                    <option value="Saúde">Saúde</option>
+                                    <option value="SaÃºde">SaÃºde</option>
                                     <option value="Compras">Compras</option>
                                     <option value="Outros">Outros</option>
                                 </select>
@@ -236,12 +236,12 @@
                         </form>
                     </div>
                     
-                    <!-- Formulário para Adicionar Receita -->
+                    <!-- FormulÃ¡rio para Adicionar Receita -->
                     <div class="mb-8" id="add-income-section">
                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Adicionar Nova Receita</h2>
                         <form id="income-form" class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end p-4 bg-gray-50 rounded-lg border">
                             <div class="col-span-1 sm:col-span-2">
-                                <label for="income-description" class="block text-sm font-medium text-gray-600 mb-1">Descrição</label>
+                                <label for="income-description" class="block text-sm font-medium text-gray-600 mb-1">DescriÃ§Ã£o</label>
                                 <input type="text" id="income-description" placeholder="Ex: Venda de item" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition" required>
                             </div>
                             <div>
@@ -263,12 +263,12 @@
                     <!-- Lista de Gastos -->
                     <div>
                          <div class="flex flex-wrap justify-between items-center mb-4 gap-4">
-                            <h2 class="text-xl font-semibold text-gray-700">Histórico de Gastos do Mês</h2>
+                            <h2 class="text-xl font-semibold text-gray-700">HistÃ³rico de Gastos do MÃªs</h2>
                             <div class="flex items-center gap-4">
                                 <div class="flex items-center gap-2">
                                     <button id="import-btn" title="Importar JSON" class="p-2 rounded-full hover:bg-gray-200 transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg></button>
                                     <button id="export-btn" title="Exportar JSON" class="p-2 rounded-full hover:bg-gray-200 transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg></button>
-                                    <button id="delete-month-btn" title="Apagar Lançamentos do Mês" class="p-2 rounded-full hover:bg-red-100 transition text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button>
+                                    <button id="delete-month-btn" title="Apagar LanÃ§amentos do MÃªs" class="p-2 rounded-full hover:bg-red-100 transition text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button>
                                     <button id="reset-btn" title="Zerar Tudo" class="p-2 rounded-full hover:bg-red-100 transition text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" /></svg></button>
                                     <input type="file" id="import-file-input" class="hidden" accept=".json">
                                 </div>
@@ -280,46 +280,46 @@
                             </div>
                         </div>
                         <div id="expense-list" class="space-y-3">
-                             <p id="empty-state" class="text-center text-gray-500 py-6">Nenhum gasto neste mês.</p>
+                             <p id="empty-state" class="text-center text-gray-500 py-6">Nenhum gasto neste mÃªs.</p>
                         </div>
                     </div>
 
                     <!-- Lista de Receitas -->
                     <div class="mt-8">
-                         <h2 class="text-xl font-semibold text-gray-700 mb-4">Histórico de Receitas do Mês</h2>
+                         <h2 class="text-xl font-semibold text-gray-700 mb-4">HistÃ³rico de Receitas do MÃªs</h2>
                          <div id="income-list" class="space-y-3">
-                            <p id="empty-state-income" class="text-center text-gray-500 py-6">Nenhuma receita neste mês.</p>
+                            <p id="empty-state-income" class="text-center text-gray-500 py-6">Nenhuma receita neste mÃªs.</p>
                          </div>
                     </div>
                 </div>
                 
-                <!-- Conteúdo da Aba Relatório -->
+                <!-- ConteÃºdo da Aba RelatÃ³rio -->
                 <div id="content-relatorio" class="hidden">
-                     <h2 class="text-2xl font-semibold text-gray-700 mb-6">Gráfico Anual: Receitas vs. Despesas</h2>
+                     <h2 class="text-2xl font-semibold text-gray-700 mb-6">GrÃ¡fico Anual: Receitas vs. Despesas</h2>
                      <div class="mb-4 p-4 bg-gray-50 rounded-lg border">
-                        <h3 class="text-lg font-medium text-gray-700 mb-2">Filtrar Meses do Gráfico</h3>
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">Filtrar Meses do GrÃ¡fico</h3>
                         <div id="month-filter-container" class="flex flex-wrap gap-x-4 gap-y-2">
-                            <!-- Checkboxes serão inseridos aqui -->
+                            <!-- Checkboxes serÃ£o inseridos aqui -->
                         </div>
                      </div>
                      <div class="mb-8 bg-gray-50 p-4 rounded-lg border" style="height: 400px;">
                         <canvas id="annual-chart"></canvas>
                      </div>
 
-                     <h2 class="text-2xl font-semibold text-gray-700 mb-4">Relatório Detalhado</h2>
+                     <h2 class="text-2xl font-semibold text-gray-700 mb-4">RelatÃ³rio Detalhado</h2>
                      <div id="annual-report" class="overflow-x-auto">
-                        <!-- Tabela de relatório será inserida aqui -->
+                        <!-- Tabela de relatÃ³rio serÃ¡ inserida aqui -->
                      </div>
                 </div>
 
-                <!-- Conteúdo da Aba Análise Inteligente -->
+                <!-- ConteÃºdo da Aba AnÃ¡lise Inteligente -->
                 <div id="content-analise" class="hidden">
-                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">Análise Financeira com Gemini</h2>
+                    <h2 class="text-2xl font-semibold text-gray-700 mb-4">AnÃ¡lise Financeira com Gemini</h2>
                     <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                        <p class="text-gray-600 mb-4">Obtenha insights e dicas personalizadas sobre suas finanças. A IA irá analisar seus dados dos últimos meses para gerar um relatório exclusivo para você.</p>
+                        <p class="text-gray-600 mb-4">Obtenha insights e dicas personalizadas sobre suas finanÃ§as. A IA irÃ¡ analisar seus dados dos Ãºltimos meses para gerar um relatÃ³rio exclusivo para vocÃª.</p>
                         <button id="gemini-analysis-btn" class="w-full bg-purple-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition transform hover:scale-105 flex items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" /></svg>
-                            Gerar Análise com Gemini
+                            Gerar AnÃ¡lise com Gemini
                         </button>
 
                         <div id="gemini-loading" class="hidden mt-6">
@@ -328,7 +328,7 @@
                         </div>
 
                         <div id="gemini-response-container" class="mt-6">
-                            <!-- A resposta da IA aparecerá aqui -->
+                            <!-- A resposta da IA aparecerÃ¡ aqui -->
                         </div>
                     </div>
                 </div>
@@ -337,17 +337,17 @@
         </div>
     </div>
     
-    <!-- Modal de Confirmação para Zerar -->
+    <!-- Modal de ConfirmaÃ§Ã£o para Zerar -->
     <div id="reset-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                     <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Zerar Todas as Configurações?</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Zerar Todas as ConfiguraÃ§Ãµes?</h3>
                 <div class="mt-2 px-7 py-3">
                     <p class="text-sm text-gray-500">
-                        Esta ação é irreversível. Todos os seus gastos, receitas e salário salvos para este utilizador serão apagados permanentemente.
+                        Esta aÃ§Ã£o Ã© irreversÃ­vel. Todos os seus gastos, receitas e salÃ¡rio salvos para este utilizador serÃ£o apagados permanentemente.
                     </p>
                 </div>
                 <div class="items-center px-4 py-3 flex flex-col gap-3">
@@ -362,17 +362,17 @@
         </div>
     </div>
 
-     <!-- Modal de Confirmação para Apagar Lançamentos do Mês -->
+     <!-- Modal de ConfirmaÃ§Ã£o para Apagar LanÃ§amentos do MÃªs -->
     <div id="delete-month-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                     <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Apagar Lançamentos do Mês?</h3>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Apagar LanÃ§amentos do MÃªs?</h3>
                 <div class="mt-2 px-7 py-3">
                     <p class="text-sm text-gray-500">
-                        Todos os gastos e receitas de <span id="delete-month-name" class="font-bold"></span> serão apagados. Deseja continuar?
+                        Todos os gastos e receitas de <span id="delete-month-name" class="font-bold"></span> serÃ£o apagados. Deseja continuar?
                     </p>
                 </div>
                 <div class="items-center px-4 py-3 flex flex-col gap-3">
@@ -397,7 +397,7 @@
                 <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Apagar Despesa Recorrente</h3>
                 <div class="mt-2 px-7 py-3">
                     <p class="text-sm text-gray-500">
-                        Esta é uma despesa recorrente. Deseja apagar apenas esta parcela ou todas as futuras?
+                        Esta Ã© uma despesa recorrente. Deseja apagar apenas esta parcela ou todas as futuras?
                     </p>
                 </div>
                 <div class="items-center px-4 py-3 flex flex-col gap-3">
@@ -416,14 +416,14 @@
     </div>
 
 
-    <!-- Modal de Edição -->
+    <!-- Modal de EdiÃ§Ã£o -->
     <div id="edit-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-10 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
             <form id="edit-form">
                 <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="edit-modal-title">Editar Item</h3>
                 <div class="space-y-4">
                     <div>
-                        <label for="edit-description" class="block text-sm font-medium text-gray-700">Descrição</label>
+                        <label for="edit-description" class="block text-sm font-medium text-gray-700">DescriÃ§Ã£o</label>
                         <input type="text" id="edit-description" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
                     </div>
                     <div>
@@ -437,23 +437,23 @@
                     <div id="edit-category-container">
                         <label for="edit-category" class="block text-sm font-medium text-gray-700">Categoria</label>
                         <select id="edit-category" class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                            <option value="Alimentação">Alimentação</option>
+                            <option value="AlimentaÃ§Ã£o">AlimentaÃ§Ã£o</option>
                             <option value="Transporte">Transporte</option>
                             <option value="Moradia">Moradia</option>
                             <option value="Lazer">Lazer</option>
-                            <option value="Saúde">Saúde</option>
+                            <option value="SaÃºde">SaÃºde</option>
                             <option value="Compras">Compras</option>
                             <option value="Outros">Outros</option>
                         </select>
                     </div>
-                    <p class="text-xs text-gray-500">Nota: Editar um item parcelado ou recorrente irá alterar apenas esta ocorrência específica.</p>
+                    <p class="text-xs text-gray-500">Nota: Editar um item parcelado ou recorrente irÃ¡ alterar apenas esta ocorrÃªncia especÃ­fica.</p>
                 </div>
                 <div class="items-center px-4 py-3 mt-4 flex justify-end gap-3 bg-gray-50 -mx-5 -mb-5 rounded-b-md">
                     <button id="cancel-edit-btn" type="button" class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500">
                         Cancelar
                     </button>
                     <button id="confirm-edit-btn" type="submit" class="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        Salvar Alterações
+                        Salvar AlteraÃ§Ãµes
                     </button>
                 </div>
             </form>
@@ -529,7 +529,7 @@
             const addIncomeSection = document.getElementById('add-income-section');
 
 
-            // --- ESTADO DA APLICAÇÃO ---
+            // --- ESTADO DA APLICAÃ‡ÃƒO ---
             let currentUser = null;
             let users = [];
             let annualChart = null;
@@ -543,7 +543,7 @@
             let currentDate = new Date('2025-10-01T12:00:00');
             currentDate.setDate(1);
 
-             // --- LÓGICA DE LOGIN ---
+             // --- LÃ“GICA DE LOGIN ---
 
             async function hashPassword(password) {
                 const encoder = new TextEncoder();
@@ -591,7 +591,7 @@
                 renderAll();
             };
 
-            // --- LÓGICA DE DADOS POR UTILIZADOR ---
+            // --- LÃ“GICA DE DADOS POR UTILIZADOR ---
 
             const loadUserData = () => {
                 const userData = JSON.parse(localStorage.getItem(`data_${currentUser}`));
@@ -613,7 +613,7 @@
                 localStorage.setItem(`data_${currentUser}`, JSON.stringify(userData));
             };
             
-            // --- FUNÇÕES AUXILIARES E DE GERAÇÃO DE DADOS ---
+            // --- FUNÃ‡Ã•ES AUXILIARES E DE GERAÃ‡ÃƒO DE DADOS ---
 
             const formatCurrency = (value) => value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             const formatMonthYear = (date) => date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -632,25 +632,25 @@
                 const baseDate = '2025-10-01T12:00:00Z';
                 defaultData.push({ id: 'pre_rener_1', description: 'Rener', amount: 200.00, category: 'Compras', date: '2025-10-01'});
                 defaultData.push({ id: 'pre_rener_2', description: 'Rener', amount: 200.00, category: 'Compras', date: '2025-11-01'});
-                defaultData.push({ id: 'pre_maodeobrawelton_1', description: 'Mão de Obra Welton', amount: 316.66, category: 'Outros', date: '2025-10-01'});
-                defaultData.push({ id: 'pre_maodeobrawelton_2', description: 'Mão de Obra Welton', amount: 316.66, category: 'Outros', date: '2025-11-01'});
+                defaultData.push({ id: 'pre_maodeobrawelton_1', description: 'MÃ£o de Obra Welton', amount: 316.66, category: 'Outros', date: '2025-10-01'});
+                defaultData.push({ id: 'pre_maodeobrawelton_2', description: 'MÃ£o de Obra Welton', amount: 316.66, category: 'Outros', date: '2025-11-01'});
                 defaultData.push({ id: 'pre_maerecarga_1', description: 'Mae Recarga', amount: 31.21, category: 'Moradia', date: '2025-10-01'});
                 addRecurring('Acordo Tia Miciada', 48.47, 'Moradia', baseDate, 12);
                 addRecurring('Acordo Condominio', 417.00, 'Moradia', baseDate, 6);
                 addRecurring('Condominio', 500.00, 'Moradia', baseDate, 12);
                 addRecurring('Apartamento', 1296.35, 'Moradia', baseDate, 12);
                 addRecurring('Netflix', 25.00, 'Lazer', baseDate, 12);
-                addRecurring('Mistura', 300.00, 'Alimentação', baseDate, 12);
+                addRecurring('Mistura', 300.00, 'AlimentaÃ§Ã£o', baseDate, 12);
                 addRecurring('Luz', 185.00, 'Moradia', baseDate, 12);
-                addRecurring('Condução Mensal', 124.80, 'Transporte', baseDate, 12);
+                addRecurring('ConduÃ§Ã£o Mensal', 124.80, 'Transporte', baseDate, 12);
                 addRecurring('Plano Vivo', 47.00, 'Moradia', baseDate, 12);
                 addRecurring('Internet', 100.00, 'Moradia', baseDate, 12);
-                addRecurring('Medicamento', 120.00, 'Saúde', '2025-11-01T12:00:00Z', 11);
+                addRecurring('Medicamento', 120.00, 'SaÃºde', '2025-11-01T12:00:00Z', 11);
                 return defaultData;
             };
             
 
-            // --- FUNÇÕES DE RENDERIZAÇÃO ---
+            // --- FUNÃ‡Ã•ES DE RENDERIZAÃ‡ÃƒO ---
             const renderAll = () => {
                 renderMonthDisplay();
                 renderMonthlyBreakdown();
@@ -746,7 +746,7 @@
                     ctx.textBaseline = 'middle';
                     ctx.fillStyle = '#6b7280'; // gray-500
                     ctx.font = "16px 'Inter'";
-                    ctx.fillText('Nenhum dado de gasto para este mês.', chartCanvas.width / 2, chartCanvas.height / 2);
+                    ctx.fillText('Nenhum dado de gasto para este mÃªs.', chartCanvas.width / 2, chartCanvas.height / 2);
                     ctx.restore();
                     return;
                 }
@@ -807,7 +807,7 @@
             const renderProjection = () => {
                 futureProjectionEl.innerHTML = '';
                 if (salary <= 0) {
-                    futureProjectionEl.innerHTML = `<p class="text-sm text-gray-500">Informe seu salário para ver a projeção.</p>`;
+                    futureProjectionEl.innerHTML = `<p class="text-sm text-gray-500">Informe seu salÃ¡rio para ver a projeÃ§Ã£o.</p>`;
                     return;
                 }
                 for (let i = 0; i < 6; i++) {
@@ -871,7 +871,7 @@
                 const chartCanvasContainer = document.getElementById('annual-chart').parentElement;
                 
                 if (allItems.length === 0) {
-                    annualReportContainer.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum dado para exibir no relatório.</p>';
+                    annualReportContainer.innerHTML = '<p class="text-center text-gray-500 py-6">Nenhum dado para exibir no relatÃ³rio.</p>';
                     chartCanvasContainer.style.display = 'none';
                     monthFilterContainer.parentElement.style.display = 'none';
                     return;
@@ -925,7 +925,7 @@
                 const monthHeaders = allUniqueMonths.map(monthStr => monthNamesForFilter.find(m => m.value === monthStr).name);
 
                 let tableHTML = `<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DescriÃ§Ã£o</th>
                     ${monthHeaders.map(h => `<th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">${h}</th>`).join('')}
                 </tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
 
@@ -956,7 +956,7 @@
                 const startDate = new Date(document.getElementById('date').value + 'T00:00:00-03:00');
 
                 if (!description || isNaN(amountInput) || amountInput <= 0) {
-                    alert('Por favor, preencha a descrição e o valor corretamente.');
+                    alert('Por favor, preencha a descriÃ§Ã£o e o valor corretamente.');
                     return;
                 }
 
@@ -1121,8 +1121,8 @@
                     document.getElementById('installments').placeholder = "Ex: 12";
                 } else {
                     amountLabel.textContent = 'Valor Total (R$)';
-                    installmentsLabel.textContent = 'Nº de Parcelas';
-                    document.getElementById('installments').placeholder = "Vazio para despesa contínua";
+                    installmentsLabel.textContent = 'NÂº de Parcelas';
+                    document.getElementById('installments').placeholder = "Vazio para despesa contÃ­nua";
                 }
             };
 
@@ -1181,13 +1181,13 @@
                 });
                 
                 if (Object.keys(dataToAnalyze).length === 0) {
-                    geminiResponseContainer.innerHTML = `<p class="text-center text-red-500">Não há dados suficientes nos meses mais recentes para gerar uma análise.</p>`;
+                    geminiResponseContainer.innerHTML = `<p class="text-center text-red-500">NÃ£o hÃ¡ dados suficientes nos meses mais recentes para gerar uma anÃ¡lise.</p>`;
                     geminiLoading.classList.add('hidden');
                     geminiAnalysisBtn.disabled = false;
                     return;
                 }
 
-                let userQuery = `Analisar os seguintes dados financeiros de um usuário no Brasil (valores em BRL). O salário mensal dele é ${formatCurrency(salary)}.\n\n`;
+                let userQuery = `Analisar os seguintes dados financeiros de um usuÃ¡rio no Brasil (valores em BRL). O salÃ¡rio mensal dele Ã© ${formatCurrency(salary)}.\n\n`;
 
                 for (const monthKey in dataToAnalyze) {
                     const [year, month] = monthKey.split('-');
@@ -1211,7 +1211,7 @@
                     userQuery += `\n`;
                 }
 
-                const systemPrompt = "Aja como um consultor financeiro amigável e prestativo. Analise os dados de despesas e receitas a seguir e forneça um resumo claro, identifique tendências de gastos e ofereça 3 dicas práticas e acionáveis para ajudar o usuário a economizar dinheiro. Formate a resposta usando markdown, com títulos e listas.";
+                const systemPrompt = "Aja como um consultor financeiro amigÃ¡vel e prestativo. Analise os dados de despesas e receitas a seguir e forneÃ§a um resumo claro, identifique tendÃªncias de gastos e ofereÃ§a 3 dicas prÃ¡ticas e acionÃ¡veis para ajudar o usuÃ¡rio a economizar dinheiro. Formate a resposta usando markdown, com tÃ­tulos e listas.";
                 const apiKey = "";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
                 
@@ -1241,12 +1241,12 @@
                         const generatedText = candidate.content.parts[0].text;
                         geminiResponseContainer.innerHTML = simpleMarkdownToHtml(generatedText);
                     } else {
-                        throw new Error("Resposta da API inválida ou vazia.");
+                        throw new Error("Resposta da API invÃ¡lida ou vazia.");
                     }
 
                 } catch (error) {
                     console.error("Erro ao chamar a API Gemini:", error);
-                    geminiResponseContainer.innerHTML = `<p class="text-center text-red-500">Ocorreu um erro ao gerar a análise. Por favor, tente novamente mais tarde.</p>`;
+                    geminiResponseContainer.innerHTML = `<p class="text-center text-red-500">Ocorreu um erro ao gerar a anÃ¡lise. Por favor, tente novamente mais tarde.</p>`;
                 } finally {
                     geminiLoading.classList.add('hidden');
                     geminiAnalysisBtn.disabled = false;
@@ -1312,7 +1312,7 @@
                 deleteRecurringModal.classList.add('hidden');
             };
 
-            // --- INICIALIZAÇÃO E EVENT LISTENERS ---
+            // --- INICIALIZAÃ‡ÃƒO E EVENT LISTENERS ---
             
             loginBtn.addEventListener('click', async () => {
                 const username = usernameInput.value.trim();
@@ -1320,7 +1320,7 @@
                 if (!username || !password) return alert('Por favor, preencha o utilizador e a senha.');
 
                 const user = users.find(u => u.username === username);
-                if (!user) return alert('Utilizador não encontrado.');
+                if (!user) return alert('Utilizador nÃ£o encontrado.');
                 
                 const passwordHash = await hashPassword(password);
                 if (passwordHash === user.passwordHash) {
@@ -1336,7 +1336,7 @@
                 if (!username || !password) return alert('Por favor, preencha o utilizador e a senha.');
 
                 const existingUser = users.find(u => u.username === username);
-                if (existingUser) return alert('Este nome de utilizador já existe.');
+                if (existingUser) return alert('Este nome de utilizador jÃ¡ existe.');
 
                 const passwordHash = await hashPassword(password);
                 users.push({ username, passwordHash });
@@ -1443,13 +1443,13 @@
             
             // --- PWA LOGIC ---
             const manifestData = {
-                "name": "Controle de Gastos Avançado",
+                "name": "Controle de Gastos AvanÃ§ado",
                 "short_name": "Gastos",
                 "start_url": ".",
                 "display": "standalone",
                 "background_color": "#f3f4f6",
                 "theme_color": "#3b82f6",
-                "description": "Uma aplicação avançada para controlo de despesas.",
+                "description": "Uma aplicaÃ§Ã£o avanÃ§ada para controlo de despesas.",
                 "icons": [{
                     "src": "https://placehold.co/192x192/3b82f6/ffffff?text=$$&font=inter",
                     "sizes": "192x192",
@@ -1510,4 +1510,3 @@
     </script>
 </body>
 </html>
-
