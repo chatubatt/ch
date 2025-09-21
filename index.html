@@ -1181,7 +1181,7 @@
                 });
                 
                 if (Object.keys(dataToAnalyze).length === 0) {
-                    geminiResponseContainer.innerHTML = `<p class="text-center text-red-500">Não há dados suficientes nos últimos meses para gerar uma análise.</p>`;
+                    geminiResponseContainer.innerHTML = `<p class="text-center text-red-500">Não há dados suficientes nos meses mais recentes para gerar uma análise.</p>`;
                     geminiLoading.classList.add('hidden');
                     geminiAnalysisBtn.disabled = false;
                     return;
@@ -1230,7 +1230,8 @@
                     });
 
                     if (!response.ok) {
-                        throw new Error(`Erro na API: ${response.statusText}`);
+                        const errorBody = await response.text();
+                        throw new Error(`Erro na API: ${response.status} ${response.statusText} - ${errorBody}`);
                     }
                     
                     const result = await response.json();
@@ -1473,6 +1474,11 @@
                         );
                     });
                     self.addEventListener('fetch', (event) => {
+                        if (event.request.url.includes('googleapis.com')) {
+                            event.respondWith(fetch(event.request));
+                            return;
+                        }
+                        
                         event.respondWith(
                             caches.match(event.request).then((response) => {
                                 return response || fetch(event.request);
