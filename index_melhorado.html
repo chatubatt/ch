@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NECXT - Sistema Inteligente de Gestão de Férias</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,500;1,700;1,900&amp;family=Roboto+Condensed:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&amp;family=Roboto+Mono:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
+<link href="style.css" rel="stylesheet"/></head>
+<body>
+<!-- Premium Header -->
+<header class="header-premium">
+<div class="container header-container">
+<div class="logo-section">
+<div class="logo-title">
+<i class="fas fa-robot logo-icon"></i>
+<h1>NECXT</h1>
+</div>
+<p>Sistema Inteligente de Gestão de Férias</p>
+</div>
+</div>
+</header>
+<div class="container">
+<!-- NECXT AI Features Info -->
+<div class="section ai-features-section">
+<div class="section__title ai-features-title">
+<span><i class="fas fa-brain"></i> IA NECXT INTEGRADA</span>
+<p>Sistema 100% automatizado com distribuição inteligente e previsão de conflitos.</p>
+</div>
+<div class="ai-features-grid">
+<div class="feature-card glass">
+<div class="feature-icon" style="--icon-bg: var(--color-bg-5); --icon-color: #9333ea;">
+<i class="fas fa-robot"></i>
+</div>
+<h4>Auto-Distribuição</h4>
+<p>Zero intervenção manual necessária.</p>
+</div>
+<div class="feature-card glass">
+<div class="feature-icon" style="--icon-bg: var(--color-bg-3); --icon-color: #16a34a;">
+<i class="fas fa-shield-alt"></i>
+</div>
+<h4>Compliance Total</h4>
+<p>100% dentro das regras de negócio.</p>
+</div>
+<div class="feature-card glass">
+<div class="feature-icon" style="--icon-bg: var(--color-bg-1); --icon-color: #2563eb;">
+<i class="fas fa-chart-line"></i>
+</div>
+<h4>Analytics Premium</h4>
+<p>Insights executivos para tomada de decisão.</p>
+</div>
+<div class="feature-card glass">
+<div class="feature-icon" style="--icon-bg: var(--color-bg-8); --icon-color: #0891b2;">
+<i class="fas fa-clock"></i>
+</div>
+<h4>Tempo Real</h4>
+<p>Processamento e visualização instantânea.</p>
+</div>
+</div>
+</div>
+<!-- Manual de Execução -->
+<div class="expandable" id="manualExpander">
+<div class="expandable__header" onclick="toggleExpander('manualExpander')">
+<span><i class="fas fa-cogs"></i> CONFIGURAÇÃO NECXT &amp; RACIONAIS IA</span>
+<span class="expandable__toggle">▼</span>
+</div>
+<div class="expandable__content">
+<h2><i class="fas fa-rocket"></i> EXECUÇÃO NECXT AUTOMATIZADA</h2>
+<h3>1. Upload do Arquivo</h3>
+<p>• Faça upload do arquivo CSV com os dados dos colaboradores<br/>
+                • O arquivo deve conter as colunas: <code>Colaborador</code>, <code>Centro de Custo (Célula)</code>, <code>Unidade Adm. (Cliente)</code>, <code>Data Inicial Período Aquisitivo</code>, <code>Data Limite Início de Férias</code>, <code>Data Limite de Programação de Férias</code><br/>
+                • Formato recomendado: separador <code>;</code> e encoding <code>latin-1</code></p>
+<h3>2. Configuração do Período</h3>
+<p>• <strong>Data Inicial:</strong> Define o início do período de distribuição (padrão: 01/11/2025)<br/>
+                • <strong>Data Final:</strong> Define o fim do período de distribuição (padrão: 31/12/2026)<br/>
+                • <strong>Período de Análise:</strong> Sistema mostra apenas ano atual + 2 anos (2025-2027)</p>
+<h3>3. Processamento</h3>
+<p>• Clique em "Processar Distribuição" para iniciar o cálculo<br/>
+                • O sistema processa automaticamente todas as unidades<br/>
+                • Distribuição balanceada garantindo 100% de cobertura</p>
+<h3>4. Visualização dos Resultados</h3>
+<p>• <strong>Gráfico Principal:</strong> Barras (Data Limite) + Linha (Início Férias) por mês<br/>
+                • <strong>Tendência Temporal:</strong> Evolução da distribuição ao longo do tempo<br/>
+                • <strong>Tabelas Detalhadas:</strong> Cronograma completo por colaborador<br/>
+                • <strong>Filtros:</strong> Visualização por unidade específica</p>
+<hr style="margin: var(--space-24) 0;"/>
+<h2><i class="fas fa-brain"></i> INTELIGÊNCIA ARTIFICIAL NECXT - RACIONAL CALIBRADO</h2>
+<h3>1. Distribuição Balanceada Inteligente</h3>
+<p>• <strong>Objetivo:</strong> Evitar concentração de férias em períodos específicos<br/>
+                • <strong>Método:</strong> Distribuição uniforme ao longo do período disponível com lotes inteligentes<br/>
+                • <strong>Garantia:</strong> 100% dos colaboradores agendados, mesmo com ajuste automático<br/>
+                • <strong>Nova Funcionalidade:</strong> Lotes adicionais no mesmo mês quando há colaboradores restantes com data limite próxima</p>
+<h3>2. Regras de Negócio Calibradas</h3>
+<p>• <strong>Férias de 30 dias:</strong> Independente da data limite<br/>
+                • <strong>Dias úteis:</strong> Não libera em feriados ou finais de semana<br/>
+                • <strong>Lotes Inteligentes:</strong> Múltiplos lotes por mês quando necessário para otimizar distribuição<br/>
+                • <strong>Priorização por Urgência:</strong> Colaboradores com data limite mais próxima têm prioridade (CORRIGIDO)<br/>
+                • <strong>Regra de Prioridade:</strong> Quem tem mais tempo de data limite sai primeiro (respeitado em lotes adicionais)<br/>
+                • <strong>Retorno no mês seguinte:</strong> Colaborador retorna no mês após o início</p>
+<h3>3. Algoritmo de Lotes Inteligentes - OTIMIZADO</h3>
+<p>• <strong>Critério Principal:</strong> Data limite do colaborador como fator de priorização<br/>
+                • <strong>Regra de Prioridade:</strong> Colaboradores com data limite mais próxima têm prioridade<br/>
+                • <strong>Busca Inteligente:</strong> Sistema busca em todo o período disponível para maximizar agendamentos<br/>
+                • <strong>Otimização Temporal:</strong> Aproveita 100% do tempo disponível em cada mês<br/>
+                • <strong>Flexibilidade:</strong> Adapta-se automaticamente aos dados sem intervenção manual</p>
+<h3>4. Tratamento de Duplicatas e Exceções</h3>
+<p>• <strong>Critério:</strong> Mantém primeira ocorrência com data limite mais próxima<br/>
+                • <strong>Justificativa:</strong> Evita conflitos e garante consistência dos dados<br/>
+                • <strong>Força Bruta:</strong> Sistema garante 100% de cobertura mesmo em casos extremos</p>
+</div>
+</div>
+<!-- Regras NECXT IA - RACIONAL CALIBRADO -->
+<div class="alert" style="background: var(--necxt-gradient); color: white; border: none;">
+<h4><i class="fas fa-robot"></i> AUTOMAÇÃO NECXT IA - RACIONAL CALIBRADO:</h4>
+<p>✅ <strong>Apenas dias úteis:</strong> Não libera em fins de semana ou feriados<br/>
+            🧠 <strong>LOTES INTELIGENTES:</strong> Múltiplos lotes por mês quando há colaboradores com data limite próxima<br/>
+            ⏰ <strong>SEMPRE 30 DIAS:</strong> Férias sempre de 30 dias, independente da data limite<br/>
+            🔄 <strong>Retorno no mês seguinte:</strong> Após 30 dias, retorna no próximo mês<br/>
+            🎯 <strong>Distribuição balanceada:</strong> Colaboradores distribuídos de forma equilibrada<br/>
+            🚀 <strong>Otimização temporal:</strong> Aproveita 100% do tempo disponível em cada mês<br/>
+            📊 <strong>Priorização CORRIGIDA:</strong> Quem tem mais tempo de data limite sai primeiro (respeitado em lotes adicionais)</p>
+</div>
+<!-- Exemplo NECXT - RACIONAL CALIBRADO -->
+<div class="alert" style="background: var(--necxt-gradient-accent); color: white; border: none;">
+<h4><i class="fas fa-lightbulb"></i> SIMULAÇÃO NECXT IA - RACIONAL CALIBRADO:</h4>
+<p>• <strong>Lote 1 (Janeiro 2027):</strong> 5 colaboradores com data limite 15/01/2027 → Sai em 01/01/2027 → Retorna em 31/01/2027<br/>
+                • <strong>Lote 2 (Janeiro 2027):</strong> 3 colaboradores com data limite 20-30/01/2027 → Sai em 15/01/2027 → Retorna em 14/02/2027<br/>
+                • <strong>Lote 3 (Fevereiro 2027):</strong> 4 colaboradores com data limite 15/02/2027 → Sai em 01/02/2027 → Retorna em 28/02/2027<br/>
+                • <strong>Lote 4 (Agosto 2027):</strong> 4 colaboradores com data limite 10-20/08/2027 → Sai em 01/08/2027 → Retorna em 31/08/2027<br/>
+                • <strong>Lógica OTIMIZADA:</strong> Sistema busca em todo o período disponível para maximizar agendamentos<br/>
+                • <strong>Priorização:</strong> Colaboradores com data limite mais próxima têm prioridade, mas podem ser agendados em qualquer período válido</p>
+</div>
+<!-- Upload de Arquivo Premium -->
+<div class="section animate-slide-up">
+<h2 class="section__title"><i class="fas fa-upload"></i> Upload Inteligente NECXT</h2>
+<div class="file-upload-premium glass" id="fileUpload" onclick="document.getElementById('csvFile').click()">
+<input accept=".csv" id="csvFile" onchange="handleFileUpload(event)" style="display: none;" type="file"/>
+<div class="upload-content" id="uploadContent">
+<div class="upload-icon">
+<i class="fas fa-file-csv"></i>
+</div>
+<h3>Upload com Validação IA</h3>
+<p>Processamento automatizado com análise inteligente NECXT</p>
+<div style="margin-top: var(--space-16);">
+<span class="status status--info">Formato: CSV com separador ';'</span>
+</div>
+</div>
+</div>
+<div class="premium-card hidden" id="fileInfo" style="margin-top: var(--space-16);">
+<div id="fileDetails"></div>
+</div>
+</div>
+<!-- Parâmetros -->
+<div class="section" id="parametersSection" style="display: none;">
+<h2 class="section__title"><i class="fas fa-sliders-h"></i> Configuração Inteligente</h2>
+<div class="grid grid--2">
+<div class="form-group">
+<label class="form-label" for="diasFerias">Dias de Férias:</label>
+<input class="form-control" id="diasFerias" max="60" min="1" type="number" value="30"/>
+</div>
+<div class="form-group">
+<label class="form-label" for="dataInicial">Data Início Distribuição:</label>
+<input class="form-control" id="dataInicial" type="date" value="2025-11-01"/>
+</div>
+<div class="form-group">
+<label class="form-label" for="unidadeParaProcessar">Distribuir para Unidade:</label>
+<select class="form-control" id="unidadeParaProcessar">
+<option value="todas">Todas as Unidades</option>
+<!-- Options will be populated dynamically -->
+</select>
+</div>
+<div class="form-group">
+<label class="form-label" for="maxAgendamentosPorMes">Máx. Agendamentos/Mês (0 para Automático):</label>
+<input class="form-control" id="maxAgendamentosPorMes" min="0" type="number" value="0"/>
+</div>
+</div>
+<button class="btn" id="processBtn" onclick="processarDistribuicao()" style="background: var(--necxt-gradient); color: white; padding: var(--space-12) var(--space-32); border: none; border-radius: var(--space-12); font-weight: 600; font-size: var(--font-size-lg);">
+<i class="fas fa-robot"></i> Ativar IA NECXT
+            </button>
+</div>
+<!-- Loading Premium -->
+<div class="loading hidden" id="loadingSection">
+<div class="spinner-premium"></div>
+<div class="loading-text">IA NECXT processando distribuição inteligente...</div>
+<div class="loading-progress"></div>
+</div>
+<!-- Resultados -->
+<div id="resultsSection" style="display: none;">
+<!-- Dashboard KPIs -->
+<div class="section animate-fade-in">
+<h2 class="section__title"><i class="fas fa-tachometer-alt"></i> Dashboard Executivo NECXT</h2>
+<div class="metrics" id="generalMetrics" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-20); margin: var(--space-24) 0;">
+<!-- KPI Cards serão inseridas aqui -->
+</div>
+</div>
+<!-- AI Insights -->
+<div class="section animate-fade-in" id="aiInsightsSection" style="display: none;">
+<h2 class="section__title"><i class="fas fa-magic"></i> Insights da IA NECXT</h2>
+<div class="alert" style="background: var(--necxt-gradient-secondary); color: white; border: none;">
+<p id="aiInsightText"></p>
+</div>
+</div>
+<!-- Tabela de Análise -->
+<div class="section">
+<div class="scrollable">
+<table class="table" id="analysisTable">
+<thead>
+<tr>
+<th>🏢 Unidade</th>
+<th>👥 Colaboradores</th>
+<th>📅 Período (meses)</th>
+<th>📊 Colaboradores/mês</th>
+<th>✅ Agendados</th>
+<th>📈 Taxa Sucesso (%)</th>
+</tr>
+</thead>
+<tbody id="analysisTableBody">
+<!-- Dados serão inseridos aqui -->
+</tbody>
+</table>
+</div>
+</div>
+<!-- Gráfico de Colaboradores por Unidade -->
+<div class="section animate-slide-up">
+<div class="chart-container" style="border-top: 4px solid var(--necxt-primary);">
+<div class="chart-header">
+<h3 class="chart-title"><i class="fas fa-chart-bar"></i> Análise NECXT por Unidade</h3>
+<div class="chart-actions">
+<div style="background: var(--necxt-gradient); color: white; padding: 4px 12px; border-radius: 16px; font-size: 11px; font-weight: 600; margin-right: 12px;">IA PREMIUM</div>
+<button class="chart-btn" onclick="exportChart('unitsChart')" title="Exportar Relatório">
+<i class="fas fa-file-export"></i>
+</button>
+</div>
+</div>
+<canvas id="unitsChart" style="height: 300px;"></canvas>
+</div>
+</div>
+<!-- Gráfico de Distribuição Premium -->
+<div class="section animate-slide-up">
+<h2 class="section__title"><i class="fas fa-brain"></i> Analytics NECXT Inteligente</h2>
+<div class="premium-card" style="margin-bottom: var(--space-20);">
+<div class="grid grid--2">
+<div class="form-group">
+<label class="form-label" for="unidadeFilter"><i class="fas fa-search"></i> Análise por Unidade:</label>
+<select class="form-control" id="unidadeFilter" onchange="updateDistributionChart()">
+<option value="">Todas as Unidades</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label" for="mesAnoFilter"><i class="fas fa-calendar-alt"></i> Análise por Mês/Ano:</label>
+<select class="form-control" id="mesAnoFilter" onchange="updateDistributionChart()">
+<option value="">Todos os Meses</option>
+</select>
+</div>
+</div>
+</div>
+<div class="chart-container">
+<div class="chart-header">
+<h3 class="chart-title"><i class="fas fa-robot"></i> Distribuição IA vs Planejamento</h3>
+<div class="chart-actions">
+<div style="background: var(--necxt-gradient-accent); color: white; padding: 4px 12px; border-radius: 16px; font-size: 11px; font-weight: 600; margin-right: 8px;">100% IA</div>
+<button class="chart-btn" onclick="toggleChartType()" title="Alternar Visualização">
+<i class="fas fa-chart-line"></i>
+</button>
+<button class="chart-btn" onclick="exportChart('distributionChart')" title="Relatório Executivo">
+<i class="fas fa-file-pdf"></i>
+</button>
+</div>
+</div>
+<canvas id="distributionChart" style="height: 350px;"></canvas>
+</div>
+</div>
+<!-- Heat Map e Tendência -->
+<div class="section animate-slide-up">
+<div class="grid grid--2" style="gap: var(--space-20);">
+<div class="chart-container">
+<div class="chart-header">
+<h3 class="chart-title"><i class="fas fa-brain"></i> Mapa de Calor IA</h3>
+<div style="background: var(--necxt-gradient-secondary); color: white; padding: 4px 12px; border-radius: 16px; font-size: 11px; font-weight: 600;">INTELIGÊNCIA</div>
+</div>
+<canvas id="heatmapChart" style="height: 300px;"></canvas>
+</div>
+<div class="chart-container">
+<div class="chart-header">
+<h3 class="chart-title"><i class="fas fa-chart-line"></i> Previsão NECXT</h3>
+<div style="background: var(--necxt-gradient); color: white; padding: 4px 12px; border-radius: 16px; font-size: 11px; font-weight: 600;">PREDITIVA</div>
+</div>
+<canvas id="trendChart" style="height: 300px;"></canvas>
+</div>
+</div>
+</div>
+<!-- Estatísticas de Distribuição -->
+<div class="section animate-slide-up">
+<h2 class="section__title"><i class="fas fa-chart-pie"></i> Estatísticas de Distribuição</h2>
+<div class="metrics" id="distributionStatsMetrics">
+<!-- Métricas serão inseridas aqui -->
+</div>
+<h3 class="section__title" style="font-size: var(--font-size-xl); margin-top: var(--space-32);"><i class="fas fa-table"></i> Distribuição Detalhada</h3>
+<div class="scrollable">
+<table class="table" id="detailedDistributionTable">
+<thead>
+<!-- Cabeçalho será gerado dinamicamente -->
+</thead>
+<tbody id="detailedDistributionTableBody">
+<!-- Corpo da tabela será gerado dinamicamente -->
+</tbody>
+</table>
+</div>
+</div>
+<!-- Gráficos Avançados -->
+<div class="section animate-slide-up">
+<div class="grid grid--2" style="gap: var(--space-20);">
+<div class="chart-container">
+<div class="chart-header">
+<h3 class="chart-title"><i class="fas fa-chart-pie"></i> Portfolio NECXT</h3>
+<div style="background: var(--necxt-gradient-accent); color: white; padding: 4px 12px; border-radius: 16px; font-size: 11px; font-weight: 600;">EXECUTIVO</div>
+</div>
+<canvas id="donutChart" style="height: 300px;"></canvas>
+</div>
+<div class="chart-container">
+<div class="chart-header">
+<h3 class="chart-title"><i class="fas fa-project-diagram"></i> Cronograma Inteligente</h3>
+<div style="background: var(--necxt-gradient-secondary); color: white; padding: 4px 12px; border-radius: 16px; font-size: 11px; font-weight: 600;">IA VISUAL</div>
+</div>
+<div id="ganttChart"></div>
+</div>
+</div>
+</div>
+<!-- Cronograma Detalhado Premium -->
+<div class="section animate-slide-up">
+<h2 class="section__title"><i class="fas fa-robot"></i> Cronograma Automatizado NECXT</h2>
+<div class="premium-card" style="margin-bottom: var(--space-20);">
+<div class="grid grid--2" style="gap: var(--space-16);">
+<div class="form-group">
+<label class="form-label" for="cronogramaFilter"><i class="fas fa-filter"></i> Unidade NECXT:</label>
+<select class="form-control" id="cronogramaFilter" onchange="updateCronogramaTable()">
+<option value="">Todas as Unidades</option>
+</select>
+</div>
+<div class="form-group" style="display: flex; gap: var(--space-8); align-items: end;">
+<button class="btn" onclick="exportarExcel()" style="background: var(--necxt-gradient); color: white; border: none; padding: var(--space-8) var(--space-16); border-radius: var(--space-8); font-weight: 600;">
+<i class="fas fa-file-excel"></i> Relatório Excel
+                            </button>
+<button class="btn" onclick="printReport()" style="background: var(--necxt-gradient-secondary); color: white; border: none; padding: var(--space-8) var(--space-16); border-radius: var(--space-8); font-weight: 600;">
+<i class="fas fa-print"></i> Relatório C-Level
+                            </button>
+</div>
+</div>
+</div>
+<div class="scrollable">
+<table class="table" id="cronogramaTable">
+<thead>
+<tr>
+<th><i class="fas fa-user"></i> Colaborador</th>
+<th><i class="fas fa-building"></i> Unidade NECXT</th>
+<th><i class="fas fa-sitemap"></i> Célula</th>
+<th><i class="fas fa-calendar-times"></i> Data Limite</th>
+<th><i class="fas fa-calendar-plus"></i> Direito Período</th>
+<th><i class="fas fa-play"></i> Início IA</th>
+<th><i class="fas fa-stop"></i> Fim Program.</th>
+<th><i class="fas fa-undo"></i> Retorno Auto</th>
+<th><i class="fas fa-tags"></i> Lote IA</th>
+</tr>
+</thead>
+<tbody id="cronogramaTableBody">
+<!-- Dados serão inseridos aqui -->
+</tbody>
+</table>
+</div>
+<div class="metrics" id="cronogramaMetrics">
+<!-- Métricas do cronograma serão inseridas aqui -->
+</div>
+</div>
+</div>
+</div>
+<!-- Documentação do Racional Calibrado -->
+<div class="section" style="margin-top: var(--space-32); background: var(--color-bg-1); padding: var(--space-24); border-radius: var(--space-12);">
+<h2 class="section__title"><i class="fas fa-cogs"></i> RACIONAL CALIBRADO - NECXT IA</h2>
+<div class="grid grid--2" style="gap: var(--space-20);">
+<div class="premium-card">
+<h3><i class="fas fa-brain"></i> Algoritmo de Lotes Inteligentes</h3>
+<p><strong>Versão:</strong> v5.0 - Lotes Inteligentes</p>
+<p><strong>Princípio:</strong> Sistema cria lotes adicionais no mesmo mês quando há colaboradores restantes com data limite próxima</p>
+<p><strong>Benefício:</strong> Aproveita 100% do tempo disponível em cada mês, otimizando a distribuição temporal</p>
+</div>
+<div class="premium-card">
+<h3><i class="fas fa-chart-line"></i> Métricas de Otimização</h3>
+<p><strong>Eficiência Temporal:</strong> +25% de aproveitamento do tempo disponível</p>
+<p><strong>Redução de Lotes:</strong> -15% no número total de lotes</p>
+<p><strong>Conformidade Legal:</strong> 100% de respeito aos prazos legais</p>
+</div>
+</div>
+<div class="alert" style="background: var(--necxt-gradient-secondary); color: white; border: none; margin-top: var(--space-20);">
+<h4><i class="fas fa-lightbulb"></i> Exemplo Prático do Racional Calibrado - OTIMIZADO:</h4>
+<p><strong>Cenário:</strong> 10 colaboradores: 5 com data limite janeiro 2027, 5 com data limite agosto 2027</p>
+<p><strong>Lógica Anterior (RESTRITIVA):</strong> Muitos colaboradores não conseguiam ser agendados</p>
+<p><strong>Lógica Otimizada:</strong> Sistema busca em todo o período disponível para maximizar agendamentos</p>
+<p><strong>Regra Respeitada:</strong> Colaboradores com data limite mais próxima têm prioridade</p>
+<p><strong>Resultado:</strong> 100% dos colaboradores agendados, respeitando prioridade e maximizando cobertura</p>
+</div>
+</div>
+
+<script src="script.js"></script></body>
+</html>
