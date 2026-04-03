@@ -1,0 +1,49 @@
+table Parâmetro_Data
+	lineageTag: 8be4fb62-e787-4299-8ab2-522ee0fea7d3
+
+	column Parâmetro
+		lineageTag: 08329583-5f1b-4dbf-9954-8501230677fb
+		summarizeBy: none
+		sourceColumn: [Value1]
+		sortByColumn: 'Parâmetro Pedido'
+
+		relatedColumnDetails
+			groupByColumn: 'Parâmetro Campos'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Parâmetro Campos'
+		isHidden
+		lineageTag: e44fb35f-e600-4b79-8e74-8c9852e2e9b5
+		summarizeBy: none
+		sourceColumn: [Value2]
+		sortByColumn: 'Parâmetro Pedido'
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 3,
+				  "kind": 2
+				}
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Parâmetro Pedido'
+		isHidden
+		formatString: 0
+		lineageTag: d27dbb35-2db6-43af-92b2-1498185012ea
+		summarizeBy: sum
+		sourceColumn: [Value3]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Parâmetro_Data = calculated
+		mode: import
+		source =
+				{
+				    ("Mensal", NAMEOF('Ultimos3MesesTabela*'[Mês/Ano]), 0),
+				    ("Semanal", NAMEOF('Ultimos3MesesTabela*'[Semana no Mês Nomeada]), 1),
+				    ("Diário", NAMEOF('Ultimos3MesesTabela*'[Data com Dia Abrev]), 2)
+				}
+
+	annotation PBI_Id = 96a76db9fa674cb9b9fc2be83549ade5
+

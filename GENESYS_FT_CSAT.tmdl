@@ -1,0 +1,149 @@
+table GENESYS_FT_CSAT
+	lineageTag: c724c1f0-f3ac-4517-88eb-6cf605bbf12e
+
+	column row_date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: a44a46ea-184a-4756-9412-45b43cd7385e
+		summarizeBy: none
+		sourceColumn: row_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column DIVISION_NAME
+		dataType: string
+		lineageTag: 4c37ae05-c4c9-4de7-ac5d-a8480d91ebbe
+		summarizeBy: none
+		sourceColumn: DIVISION_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column ROUTING_SKILL_NAME
+		dataType: string
+		lineageTag: d9b7533d-a2a9-4bcb-b2c9-14bdf663b0e4
+		summarizeBy: none
+		sourceColumn: ROUTING_SKILL_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column CONVERSATION_ID
+		dataType: string
+		lineageTag: acdc3486-a33c-4b6b-b89a-4dfe4660eaba
+		summarizeBy: none
+		sourceColumn: CONVERSATION_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column RESOURCE_NAME
+		dataType: string
+		lineageTag: 17864260-eec1-4461-b19a-72cc2be9e6fc
+		summarizeBy: none
+		sourceColumn: RESOURCE_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column EMPLOYEE_ID
+		dataType: string
+		lineageTag: 48dfa7e9-ab5b-4d67-98f7-b7708cf30b60
+		summarizeBy: none
+		sourceColumn: EMPLOYEE_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column TOTAL_SCORE
+		dataType: double
+		lineageTag: d0710619-db86-4a41-b7c4-9467bc348686
+		summarizeBy: sum
+		sourceColumn: TOTAL_SCORE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column NPS_SCORE
+		dataType: double
+		lineageTag: befa08bf-f478-426c-9269-93ef949caa8c
+		summarizeBy: sum
+		sourceColumn: NPS_SCORE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TEXT
+		dataType: string
+		lineageTag: 87ad0c24-135d-439d-8b1c-d8cc5a9e33fd
+		summarizeBy: none
+		sourceColumn: TEXT
+
+		annotation SummarizationSetBy = Automatic
+
+	column SCORE
+		dataType: double
+		lineageTag: a9f09cf2-dfa4-4c25-a044-663981f3c155
+		summarizeBy: sum
+		sourceColumn: SCORE
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CONVERSATION_START
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: e7a9b07c-d96b-4e95-9af1-1d492fddce86
+		summarizeBy: none
+		sourceColumn: CONVERSATION_START
+
+		variation Variation
+			isDefault
+			relationship: 5077f03f-583c-4fef-b3f2-b9793378d6e9
+			defaultHierarchy: LocalDateTable_f632aa21-45ea-4bdb-921f-8c51e31b310d.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column ANSWER
+		dataType: string
+		lineageTag: e936dd43-1239-4253-be67-6120bd185c47
+		summarizeBy: none
+		sourceColumn: ANSWER
+
+		annotation SummarizationSetBy = Automatic
+
+	column INTERVALO
+		dataType: string
+		lineageTag: c5ae4099-8812-4861-957a-ce2638259ed6
+		summarizeBy: none
+		sourceColumn: INTERVALO
+
+		annotation SummarizationSetBy = Automatic
+
+	column USER_NAME
+		dataType: string
+		lineageTag: 2fc5bef0-e101-450a-b1de-7073455aa908
+		summarizeBy: none
+		sourceColumn: USER_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	partition GENESYS_FT_CSAT = m
+		mode: import
+		queryGroup: CSAT
+		source =
+				let
+				    Fonte = PowerPlatform.Dataflows(null),
+				    Workspaces = Fonte{[Id="Workspaces"]}[Data],
+				    #"9099524d-5d03-49b4-b51f-776c29c149aa" = Workspaces{[workspaceId="9099524d-5d03-49b4-b51f-776c29c149aa"]}[Data],
+				    #"dbbffec5-02b7-401a-bc45-ad720e259ed7" = #"9099524d-5d03-49b4-b51f-776c29c149aa"{[dataflowId="dbbffec5-02b7-401a-bc45-ad720e259ed7"]}[Data],
+				    #"GENESYS_CSAT (COMGAS)_" = #"dbbffec5-02b7-401a-bc45-ad720e259ed7"{[entity="GENESYS_CSAT (COMGAS)",version=""]}[Data],
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"GENESYS_CSAT (COMGAS)_",{{"CONVERSATION_START", type datetime}}),
+				    #"Linhas Filtradas" = Table.SelectRows(#"Tipo Alterado", each [CONVERSATION_START] >= #"DATA INICIO GENESYS")
+				in
+				    #"Linhas Filtradas"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
