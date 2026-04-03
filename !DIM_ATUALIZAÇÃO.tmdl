@@ -17,7 +17,7 @@ table !DIM_ATUALIZAÇÃO
 
 	partition !DIM_ATUALIZAÇÃO = m
 		mode: import
-		queryGroup: DIMENSÕES
+		queryGroup: DIM
 		source =
 				let
 				    Fonte = DateTimeZone.SwitchZone(DateTimeZone.LocalNow(),-3),
