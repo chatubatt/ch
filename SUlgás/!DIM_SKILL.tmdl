@@ -1,0 +1,49 @@
+table !DIM_SKILL
+	lineageTag: 3dbc296e-5f37-43e4-b10f-5c4bc09b01a2
+
+	column SKILL
+		dataType: string
+		lineageTag: 0d9cd0ad-3b85-4e72-9afe-2d0fe88509c2
+		summarizeBy: none
+		sourceColumn: SKILL
+
+		annotation SummarizationSetBy = Automatic
+
+	column FILA
+		dataType: string
+		lineageTag: 2e286781-70ed-4666-8344-d8ddfe4214c4
+		summarizeBy: none
+		sourceColumn: FILA
+
+		annotation SummarizationSetBy = Automatic
+
+	column CONTAPA
+		dataType: string
+		lineageTag: a3bb0e72-4b0f-44ea-a583-a8848de46c75
+		summarizeBy: none
+		sourceColumn: CONTAPA
+
+		annotation SummarizationSetBy = Automatic
+
+	column FORECAST
+		dataType: string
+		lineageTag: 49ad423a-eb0c-4eb3-b389-5e009a02cf2d
+		summarizeBy: none
+		sourceColumn: FORECAST
+
+		annotation SummarizationSetBy = Automatic
+
+	partition !DIM_SKILL = m
+		mode: import
+		queryGroup: DIM
+		source =
+				let
+				    Fonte = Table.FromRows(Json.Document(Binary.Decompress(Binary.FromText("i45WCvZxd4x3zU0tSk/NS85MVNJRcsvMSQwuzUlPLAZywNLO+XkliQGOYflVQBGlWB2oruD8nMzkzBKS9Ljm5Kdn5pOiIyg1OScxNzE5kVhdzv5+wf4+ni6OLv6EdSArjo0FAA==", BinaryEncoding.Base64), Compression.Deflate)), let _t = ((type nullable text) meta [Serialized.Text = true]) in type table [SKILL = _t, FILA = _t, CONTAPA = _t, FORECAST = _t]),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(Fonte,{{"SKILL", type text}, {"FILA", type text}, {"CONTAPA", type text}})
+				in
+				    #"Tipo Alterado"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

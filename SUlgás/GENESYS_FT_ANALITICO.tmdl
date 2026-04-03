@@ -1,0 +1,392 @@
+table GENESYS_FT_ANALITICO
+	lineageTag: fb8384aa-916d-4bb8-8226-27cfe3d25d23
+
+	column row_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: bc4f2e7c-ddac-4d1b-9eee-25b0785ee430
+		summarizeBy: none
+		sourceColumn: row_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column CONVERSATION_ID
+		dataType: string
+		lineageTag: 559b55e6-dc00-44a6-847e-29f33187d06a
+		summarizeBy: none
+		sourceColumn: CONVERSATION_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column CONVERSATION_END
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 9ccd5bf1-f2b5-4341-9b18-8f2f000774cb
+		summarizeBy: none
+		sourceColumn: CONVERSATION_END
+
+		variation Variation
+			isDefault
+			relationship: e40c6852-0c27-44cc-ba87-c556afe9f619
+			defaultHierarchy: LocalDateTable_679b43ee-75a1-440d-9ba5-f4a0fab9eba9.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column DIVISION_NAME
+		dataType: string
+		lineageTag: 2995b4fe-7290-4f12-bb7d-8993957f3711
+		summarizeBy: none
+		sourceColumn: DIVISION_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column ROUTING_SKILL_NAME
+		dataType: string
+		lineageTag: 8b3834c9-acc8-4c15-b37b-722d802ef906
+		summarizeBy: none
+		sourceColumn: ROUTING_SKILL_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column ANSWERED_TIME
+		dataType: int64
+		lineageTag: a805277d-2949-4135-907e-8f2f23185c2f
+		summarizeBy: sum
+		sourceColumn: ANSWERED_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TALK_COMPLETE_TIME
+		dataType: int64
+		lineageTag: 6b6edc2c-a2ae-465b-9e58-b4073f5626de
+		summarizeBy: sum
+		sourceColumn: TALK_COMPLETE_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ABANDON_TIME
+		dataType: int64
+		lineageTag: d198d037-1463-4385-a12e-0ef638e60001
+		summarizeBy: sum
+		sourceColumn: ABANDON_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column SEGMENT_START_CORRIGIDO
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 46fa53ed-c3f1-41d9-a3ce-e07b4fed4258
+		summarizeBy: none
+		sourceColumn: SEGMENT_START_CORRIGIDO
+
+		variation Variation
+			isDefault
+			relationship: db9f6315-e22e-4c7d-ad24-4c39f29cdbad
+			defaultHierarchy: LocalDateTable_b1984c38-a22e-4bf2-89e3-0cc5f582d9f3.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column id
+		dataType: int64
+		formatString: 0
+		lineageTag: 0cb3aee9-4751-4ac7-ae75-cbdb9821e9b7
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+	column PARTICIPANT_ORDINAL
+		dataType: int64
+		formatString: 0
+		lineageTag: f00d8183-2309-4fd8-8c64-8ca06d15a902
+		summarizeBy: sum
+		sourceColumn: PARTICIPANT_ORDINAL
+
+		annotation SummarizationSetBy = Automatic
+
+	column SESSION_DIRECTION
+		dataType: string
+		lineageTag: c42dcb5b-eb4e-4aec-a887-b6283f0feab6
+		summarizeBy: none
+		sourceColumn: SESSION_DIRECTION
+
+		annotation SummarizationSetBy = Automatic
+
+	column SEGMENT_START
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 50dd7fc8-34fb-497f-8740-a3e5d8fda94a
+		summarizeBy: none
+		sourceColumn: SEGMENT_START
+
+		variation Variation
+			isDefault
+			relationship: 0996ee8b-bf3d-4c17-bcf9-8112f3fac125
+			defaultHierarchy: LocalDateTable_41a90f9f-44b7-4d1f-b22b-ca8983fa7808.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column SEGMENT_END
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 7af6ad0e-394d-4460-bab9-b47578ba7d97
+		summarizeBy: none
+		sourceColumn: SEGMENT_END
+
+		variation Variation
+			isDefault
+			relationship: 7f3e5938-4cd6-49f2-b8ae-cf14dbaedee2
+			defaultHierarchy: LocalDateTable_64e7ef16-1719-4ccb-92b5-82982636003a.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column DIVISION_ID
+		dataType: string
+		lineageTag: 72baf1d6-6ef3-44f4-afae-555566ebd586
+		summarizeBy: none
+		sourceColumn: DIVISION_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column QUEUE_ID
+		dataType: string
+		lineageTag: 2b31a00e-edd2-4714-bab4-2483eb58a1b5
+		summarizeBy: none
+		sourceColumn: QUEUE_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column WRAP_UP_NAME
+		dataType: string
+		lineageTag: 0ac82f84-3131-4688-9b7a-dd1ef52ebbe5
+		summarizeBy: none
+		sourceColumn: WRAP_UP_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column REQUESTED_ROUTING_SKILL_IDS
+		dataType: string
+		lineageTag: c22ebce5-5285-4ce8-a2e7-5f64c44e8f28
+		summarizeBy: none
+		sourceColumn: REQUESTED_ROUTING_SKILL_IDS
+
+		annotation SummarizationSetBy = Automatic
+
+	column OFFERED
+		dataType: int64
+		formatString: 0
+		lineageTag: 883df7b5-43c0-4854-9d09-6091c429e8c3
+		summarizeBy: sum
+		sourceColumn: OFFERED
+
+		annotation SummarizationSetBy = Automatic
+
+	column ACD_TIME
+		dataType: int64
+		formatString: 0
+		lineageTag: d3d2d998-d360-4e81-8003-0bf98d99b45b
+		summarizeBy: sum
+		sourceColumn: ACD_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+	column ACW_TIME
+		dataType: int64
+		formatString: 0
+		lineageTag: 5849911a-6121-43b3-88ce-50bb50112c05
+		summarizeBy: sum
+		sourceColumn: ACW_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+	column AGENT_RESPONSE_TIME
+		dataType: int64
+		formatString: 0
+		lineageTag: 4e9be4ec-c785-4391-b150-a028332cb7db
+		summarizeBy: sum
+		sourceColumn: AGENT_RESPONSE_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+	column ALERT_TIME
+		dataType: int64
+		formatString: 0
+		lineageTag: c073ea87-c0ed-43e1-bbef-28790e10491f
+		summarizeBy: sum
+		sourceColumn: ALERT_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+	column FLOW_TIME
+		dataType: int64
+		formatString: 0
+		lineageTag: 39992909-8604-4c2a-bc57-6b59245d051c
+		summarizeBy: sum
+		sourceColumn: FLOW_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+	column FLOW_EXIT_TIME
+		dataType: int64
+		formatString: 0
+		lineageTag: d2ae319d-b93f-478c-a01d-24bb17634e2a
+		summarizeBy: sum
+		sourceColumn: FLOW_EXIT_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+	column HANDLE_TIME
+		dataType: int64
+		formatString: 0
+		lineageTag: 5ee72f86-4783-4081-9955-55b6ae29aff5
+		summarizeBy: sum
+		sourceColumn: HANDLE_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+	column HELD_TIME
+		dataType: int64
+		formatString: 0
+		lineageTag: 0346b99e-79ff-4340-9540-4cefa3e0562e
+		summarizeBy: sum
+		sourceColumn: HELD_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+	column IVR_TIME
+		dataType: int64
+		formatString: 0
+		lineageTag: 31358b7a-fd73-469f-89a6-cf8bb953ece1
+		summarizeBy: sum
+		sourceColumn: IVR_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+	column TALK_TIME
+		dataType: int64
+		formatString: 0
+		lineageTag: 28cd6ab7-db9d-456e-953a-ab7c48f18d8f
+		summarizeBy: sum
+		sourceColumn: TALK_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+	column QUEUE_NAME
+		dataType: string
+		lineageTag: b5fcdfc2-dd34-4683-b25a-3f2df804f635
+		summarizeBy: none
+		sourceColumn: QUEUE_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column SKILL_NUM
+		dataType: string
+		lineageTag: 19c9df64-0587-460c-b09d-250496e15f86
+		summarizeBy: none
+		sourceColumn: SKILL_NUM
+
+		annotation SummarizationSetBy = Automatic
+
+	column MEDIA_TYPE
+		dataType: string
+		lineageTag: 71a9b85d-b59d-43fd-b339-acd0ac1acecb
+		summarizeBy: none
+		sourceColumn: MEDIA_TYPE
+
+		annotation SummarizationSetBy = Automatic
+
+	column USER_ID
+		dataType: string
+		lineageTag: dd57717a-5807-40f0-a388-236424d7c493
+		summarizeBy: none
+		sourceColumn: USER_ID
+
+		annotation SummarizationSetBy = Automatic
+
+	column STARTTIME
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 86af1b51-3bed-4582-875f-1fa545056842
+		summarizeBy: none
+		sourceColumn: STARTTIME
+
+		variation Variation
+			isDefault
+			relationship: 39a451ab-e7b9-4f61-9713-61f4a83bf86d
+			defaultHierarchy: LocalDateTable_895bed3b-9868-4f24-85f8-698f066ea57c.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column ROW_DATE_END
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: b16aff30-0a46-4bae-b0a4-c328f9352292
+		summarizeBy: none
+		sourceColumn: ROW_DATE_END
+
+		variation Variation
+			isDefault
+			relationship: 5a43780b-d01c-4f9a-ac3b-6ebd19b051d5
+			defaultHierarchy: LocalDateTable_0201d60e-d04f-4450-9981-a92acf9694f7.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ENDTIME
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: c8d7222e-a182-4023-b501-eb29a292b7c3
+		summarizeBy: none
+		sourceColumn: ENDTIME
+
+		variation Variation
+			isDefault
+			relationship: db77f26d-ee87-43ef-8884-c7f460aeac54
+			defaultHierarchy: LocalDateTable_a14c5dc8-24cd-4fe3-8379-df317e485fed.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column data_atualizacao
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: d4117eda-a2a7-424c-9816-ac1c5651efb1
+		summarizeBy: none
+		sourceColumn: data_atualizacao
+
+		variation Variation
+			isDefault
+			relationship: 863608ce-375b-44c3-befd-a389c1bb99c5
+			defaultHierarchy: LocalDateTable_faf394e5-aa18-4d79-8d60-e26b3890c5b1.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	partition GENESYS_FT_ANALITICO = m
+		mode: import
+		source =
+				let
+				    Fonte = PowerPlatform.Dataflows(null),
+				    Workspaces = Fonte{[Id="Workspaces"]}[Data],
+				    #"9099524d-5d03-49b4-b51f-776c29c149aa" = Workspaces{[workspaceId="9099524d-5d03-49b4-b51f-776c29c149aa"]}[Data],
+				    #"8d6c2f5f-d317-4c05-b095-1f073c937bf5" = #"9099524d-5d03-49b4-b51f-776c29c149aa"{[dataflowId="8d6c2f5f-d317-4c05-b095-1f073c937bf5"]}[Data],
+				    NEW_TELEFONIA_ANALITICO_ = #"8d6c2f5f-d317-4c05-b095-1f073c937bf5"{[entity="NEW_TELEFONIA_ANALITICO",version=""]}[Data],
+				    #"Linhas Filtradas" = Table.SelectRows(NEW_TELEFONIA_ANALITICO_, each [CONVERSATION_START] >= #"DATA INICIO GENESYS"),
+				    #"Linhas Filtradas1" = Table.SelectRows(#"Linhas Filtradas", each ([DIVISION_NAME] = "Sulgas")),
+				    #"Personalização Adicionada" = Table.AddColumn(#"Linhas Filtradas1", "SEGMENT_START_CORRIGIDO", each [CONVERSATION_START] - #duration(0,3,0,0)),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"Personalização Adicionada",{{"SEGMENT_START_CORRIGIDO", type datetime}}),
+				    #"Colunas Removidas" = Table.RemoveColumns(#"Tipo Alterado",{"CONVERSATION_START"})
+				in
+				    #"Colunas Removidas"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

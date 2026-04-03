@@ -1,0 +1,292 @@
+table GENESYS_FT_PAUSAS
+	lineageTag: 5181ad1a-ad3a-49da-8a0a-92c2116f33c3
+
+	column row_date
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 29f01b3f-9e4f-4186-b903-411aee4b954d
+		summarizeBy: none
+		sourceColumn: row_date
+
+		variation Variation
+			isDefault
+			relationship: abf18836-7619-44bc-b364-0bd3001fa46b
+			defaultHierarchy: LocalDateTable_9bc4fe40-86a7-4f97-9914-0313465dfb79.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column starttime
+		dataType: dateTime
+		formatString: Long Time
+		lineageTag: 313f618e-6d6a-4fda-a14e-965b621a4ab1
+		summarizeBy: none
+		sourceColumn: starttime
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	column DIVISION_NAME
+		dataType: string
+		lineageTag: 215d3a13-2afb-4aac-902f-bc0cb1cbf9ba
+		summarizeBy: none
+		sourceColumn: DIVISION_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column ROUTING_SKILL_NAME
+		dataType: string
+		lineageTag: 3bd6fafa-c1d3-4a2f-b36e-d6285edfcd30
+		summarizeBy: none
+		sourceColumn: ROUTING_SKILL_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column Tempo_total
+		dataType: double
+		lineageTag: 5843263e-dfb7-4981-924b-8b2cb5611ba0
+		summarizeBy: sum
+		sourceColumn: Tempo_total
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Disponivel
+		dataType: double
+		lineageTag: 18ac28b8-293a-4e5b-bdf1-5014de4ef77c
+		summarizeBy: sum
+		sourceColumn: Disponivel
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Ocupado
+		dataType: double
+		lineageTag: ed0a8c3f-d3cb-4ee2-bd60-1f9ea423924f
+		summarizeBy: sum
+		sourceColumn: Ocupado
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Treinamento
+		dataType: double
+		lineageTag: 26b83694-11c3-45b8-a78f-4fd9e143aa34
+		summarizeBy: sum
+		sourceColumn: Treinamento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Ausente
+		dataType: double
+		lineageTag: 2e87aedf-4aac-4710-9c11-113f92960dcd
+		summarizeBy: sum
+		sourceColumn: Ausente
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Fora da fila'
+		dataType: double
+		lineageTag: 15698385-4066-48ea-af11-6672de011a5b
+		summarizeBy: sum
+		sourceColumn: Fora da fila
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Em fila'
+		dataType: double
+		lineageTag: 943cdd4e-e8a4-4b37-91f4-5f9a6318a59b
+		summarizeBy: sum
+		sourceColumn: Em fila
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Interagindo
+		dataType: double
+		lineageTag: 7fa6755b-1a0e-49dd-a5aa-4f665f1401ef
+		summarizeBy: sum
+		sourceColumn: Interagindo
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Parado(a)
+		dataType: double
+		lineageTag: 735542e0-3c00-4393-96a3-6f9244389a1a
+		summarizeBy: sum
+		sourceColumn: Parado(a)
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Online
+		dataType: double
+		lineageTag: 3d29ef3f-f4f0-4920-864c-fd3cd773beea
+		summarizeBy: sum
+		sourceColumn: Online
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column N_Respondendo
+		dataType: double
+		lineageTag: 069d7785-c253-4b61-834d-846608e94bce
+		summarizeBy: sum
+		sourceColumn: N_Respondendo
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Pausa
+		dataType: double
+		lineageTag: a026efa8-cab7-4000-ac74-9a9f2c674b53
+		summarizeBy: sum
+		sourceColumn: Pausa
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Lanche
+		dataType: double
+		lineageTag: 22fd5d58-5ced-44f8-a734-d893c788f07e
+		summarizeBy: sum
+		sourceColumn: Lanche
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'DATA HORA'
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 6cba0c3c-339d-460d-b4b3-b9d335dcc14c
+		summarizeBy: none
+		sourceColumn: DATA HORA
+
+		variation Variation
+			isDefault
+			relationship: 56d735e3-d729-4f45-bcb4-bb5425eaea80
+			defaultHierarchy: LocalDateTable_819fb96f-10a7-4742-b8d7-7dda330b0596.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'HC Bruto Real' =
+			
+			CALCULATE(
+			    SUM(GENESYS_FT_PAUSAS[Tempo_total]),
+			    FILTER(
+			        GENESYS_FT_PAUSAS,
+			        GENESYS_FT_PAUSAS[ROUTING_SKILL_NAME] = EARLIER(GENESYS_FT_PAUSAS[ROUTING_SKILL_NAME]) &&
+			        GENESYS_FT_PAUSAS[row_date] = EARLIER(GENESYS_FT_PAUSAS[row_date])
+			    )
+			)
+		lineageTag: f200eaf6-35ab-48c3-8ac7-547b81343a1c
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'HC LIQUIDO TL - PNR' =
+			
+			
+			var TempoLogado = GENESYS_FT_PAUSAS[Tempo_total]
+			var PausaNR = GENESYS_FT_PAUSAS[Lanche] + GENESYS_FT_PAUSAS[Pausa]
+			
+			
+			RETURN
+			
+			TempoLogado - PausaNR
+		lineageTag: e0d3ea5d-0198-4499-b042-e64671e74a18
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column HC_Liq_Real = ```
+			
+			CALCULATE(
+			   SUM(GENESYS_FT_PAUSAS[HC LIQUIDO TL - PNR]),
+			    FILTER(
+			        GENESYS_FT_PAUSAS,
+			        GENESYS_FT_PAUSAS[ROUTING_SKILL_NAME] = EARLIER(GENESYS_FT_PAUSAS[ROUTING_SKILL_NAME]) &&
+			        GENESYS_FT_PAUSAS[row_date] = EARLIER(GENESYS_FT_PAUSAS[row_date])
+			    )
+			)
+			
+			```
+		lineageTag: 02297b3a-c25b-4b41-afd0-5b29945558b0
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Reuniao
+		dataType: double
+		lineageTag: 6448a19e-da03-42fd-81c6-b7ba3bfeb3d8
+		summarizeBy: sum
+		sourceColumn: Reuniao
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'CONTA PA' = GENESYS_FT_PAUSAS[Tempo_total]/1800
+		lineageTag: 9db692a0-93f7-4ca8-ab12-564f2b07b3f7
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MD
+		dataType: string
+		lineageTag: f62a5d51-19ae-4dfb-aa35-3285441865ba
+		summarizeBy: none
+		sourceColumn: MD
+
+		annotation SummarizationSetBy = Automatic
+
+	column CHAVE_DATA = FORMAT(GENESYS_FT_PAUSAS[DATA HORA], "DD/MM/YYYY HH:MM:SS")
+		lineageTag: 21969365-d8f4-43d8-9458-1fafdb67538f
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition GENESYS_FT_PAUSAS = m
+		mode: import
+		source =
+				let
+				    Fonte = PowerBI.Dataflows(null),
+				    #"9099524d-5d03-49b4-b51f-776c29c149aa" = Fonte{[workspaceId="9099524d-5d03-49b4-b51f-776c29c149aa"]}[Data],
+				    #"ba87d457-6b14-43c8-97dd-2822cda24661" = #"9099524d-5d03-49b4-b51f-776c29c149aa"{[dataflowId="ba87d457-6b14-43c8-97dd-2822cda24661"]}[Data],
+				    SULGAS_FT_PAUSAS = #"ba87d457-6b14-43c8-97dd-2822cda24661"{[entity="SULGAS_FT_PAUSAS"]}[Data],
+				    #"Linhas Filtradas" = Table.SelectRows(SULGAS_FT_PAUSAS, each [DATA HORA] >= #"DATA INICIO GENESYS"),
+				    #"Linhas Classificadas" = Table.Sort(#"Linhas Filtradas",{{"row_date", Order.Descending}})
+				in
+				    #"Linhas Classificadas"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
