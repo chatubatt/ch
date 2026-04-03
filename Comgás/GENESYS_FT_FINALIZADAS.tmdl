@@ -1,0 +1,182 @@
+table GENESYS_FT_FINALIZADAS
+	lineageTag: bcff7ac9-3f4b-428c-8c9a-782fdb56d8b9
+
+	column id
+		dataType: int64
+		formatString: 0
+		lineageTag: 62015b23-b346-4683-bc9a-af5a451e2471
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+	column ROW_DATE
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: c64f2ae7-f7e4-4f3a-a27c-401580dfa0e3
+		summarizeBy: none
+		sourceColumn: ROW_DATE
+
+		variation Variation
+			isDefault
+			relationship: 2f425fdd-a6b1-416a-87b6-8ca99f92419f
+			defaultHierarchy: LocalDateTable_daeb475c-2a3c-432f-9487-ef7da2b27c9c.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column STARTTIME
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 4453d347-6292-45c8-95aa-cf3a1e3828c0
+		summarizeBy: none
+		sourceColumn: STARTTIME
+
+		variation Variation
+			isDefault
+			relationship: e741eece-8ee0-4a14-93d2-de34f58b6a90
+			defaultHierarchy: LocalDateTable_c281ece4-f274-4c2a-abc2-cc8883ab0870.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column DIVISION_NAME
+		dataType: string
+		lineageTag: 14506163-9be2-4a06-804f-a1d8dad89eae
+		summarizeBy: none
+		sourceColumn: DIVISION_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column QUEUE_NAME
+		dataType: string
+		lineageTag: 446ecce9-1fcb-4c91-9785-9cbe175ec07c
+		summarizeBy: none
+		sourceColumn: QUEUE_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column ROUTING_SKILL_NAME
+		dataType: string
+		lineageTag: 3ae9f886-421b-4a35-8a7b-1293ec47163e
+		summarizeBy: none
+		sourceColumn: ROUTING_SKILL_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column SKILL_NUM
+		dataType: string
+		lineageTag: df2b1519-f7dc-4747-a0c2-89828c95dab6
+		summarizeBy: none
+		sourceColumn: SKILL_NUM
+
+		annotation SummarizationSetBy = Automatic
+
+	column FINALIZADAS
+		dataType: double
+		lineageTag: 87152832-fd8f-4802-af5f-41e610bff12d
+		summarizeBy: sum
+		sourceColumn: FINALIZADAS
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ANSWERED_TIME
+		dataType: double
+		lineageTag: 76363b09-0d46-4695-bd73-000518b10cf3
+		summarizeBy: sum
+		sourceColumn: ANSWERED_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TALK_COMPLETE_TIME
+		dataType: double
+		lineageTag: 7f70e5a0-12dc-4908-9a53-db142cefc670
+		summarizeBy: sum
+		sourceColumn: TALK_COMPLETE_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ACW_TIME
+		dataType: double
+		lineageTag: ee9d1576-5fd6-4541-9ec1-88e43df16281
+		summarizeBy: sum
+		sourceColumn: ACW_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column MD
+		dataType: string
+		lineageTag: 86263589-95ef-4266-ac4d-604b9175ea19
+		summarizeBy: none
+		sourceColumn: MD
+
+		annotation SummarizationSetBy = Automatic
+
+	column data_atualizacao
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 4ebeb559-730c-4b35-b085-039ff67a801e
+		summarizeBy: none
+		sourceColumn: data_atualizacao
+
+		variation Variation
+			isDefault
+			relationship: f56f13cc-f98f-4283-a80b-ad0bf595c30d
+			defaultHierarchy: LocalDateTable_9fb4b147-b2aa-4960-a98a-9a2fd521ee17.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'DATA HORA'
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 949e4d57-a694-4037-bdcf-63c46502396b
+		summarizeBy: none
+		sourceColumn: DATA HORA
+
+		variation Variation
+			isDefault
+			relationship: e09925c3-e10e-4dc4-9076-cd9ccbea0e5a
+			defaultHierarchy: LocalDateTable_61a5894c-cdbc-4ebb-8253-e2c77df154bd.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column TEMPO_OPERACIONAL = ```
+			GENESYS_FT_FINALIZADAS[TALK_COMPLETE_TIME] + GENESYS_FT_FINALIZADAS[ACW_TIME] 
+			```
+		lineageTag: 16aef372-306f-4832-96c7-4a5a339839e8
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CHAVE_INTERVALO = FORMAT('GENESYS_FT_FINALIZADAS'[DATA HORA], "DD/MM/YYYY HH:MM:SS")
+		lineageTag: f44cb318-fe14-4624-8524-515358d228a8
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition GENESYS_FT_FINALIZADAS = m
+		mode: import
+		queryGroup: 'FT D0 + D-1'
+		source =
+				let
+				    Fonte = Table.Combine({#"FT_FINALIZADAS_D-1", #"FT_FINALIZADAS_D-0"}),
+				    #"Linhas Filtradas" = Table.SelectRows(#"Fonte", each [DATA HORA] >= #"DATA INICIO GENESYS")
+				in
+				    #"Linhas Filtradas"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

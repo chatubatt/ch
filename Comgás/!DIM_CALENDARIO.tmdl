@@ -1,0 +1,274 @@
+table !DIM_CALENDARIO
+	lineageTag: 24b45afd-6692-41c8-9850-e5048c6fdbb7
+
+	column Data
+		formatString: General Date
+		lineageTag: 43a78039-aeb7-4671-b5b6-cb03c7a680c0
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	column CHAVE_INTERVALO = FORMAT('!DIM_CALENDARIO'[Data],"DD/MM/YYYY HH:MM:SS")
+		lineageTag: 5a809c62-0d88-4532-bcf3-b416e0c87aef
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column AnoMesSerial = YEAR('!DIM_CALENDARIO'[Data])*100 + MONTH('!DIM_CALENDARIO'[Data])
+		formatString: 0
+		lineageTag: 6ce172a8-5498-4916-bc7b-b2d954796df6
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Nome do Mês/Ano' = UPPER(LEFT(format('!DIM_CALENDARIO'[Data],"mmm")&"/"&YEAR('!DIM_CALENDARIO'[Data]),1)) & RIGHT(format('!DIM_CALENDARIO'[Data],"mmm")&"/"&YEAR('!DIM_CALENDARIO'[Data]),7)
+		lineageTag: 657b35ba-bb38-4002-b13a-4c6abccec40e
+		summarizeBy: none
+		sortByColumn: AnoMesSerial
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Mês Atual' =
+			
+			
+			var hoje = NOW() - 3/24
+			var AnoMesAtual = YEAR(hoje)*100+MONTH(hoje)
+			RETURN
+			IF(AnoMesAtual = '!DIM_CALENDARIO'[AnoMesSerial], "Mês Atual", '!DIM_CALENDARIO'[Nome do Mês/Ano])
+		lineageTag: e071e057-13f0-4588-ac24-f9203a0cfc02
+		summarizeBy: none
+		sortByColumn: AnoMesSerial
+
+		annotation SummarizationSetBy = Automatic
+
+	column Intervalo_Atual = ```
+			
+			var HoraAtual = MAX('!DIM_ATUALIZAÇÃO'[Data e Hora Certa])-- NOW() - 5/24
+			
+			var MinutosAtual = MINUTE(HoraAtual)
+			var intervalo_atual =   IF(
+			        MinutosAtual < 30,
+			        DATE(YEAR(HoraAtual), MONTH(HoraAtual), DAY(HoraAtual)) + TIME(HOUR(HoraAtual), 0, 0),
+			        DATE(YEAR(HoraAtual), MONTH(HoraAtual), DAY(HoraAtual)) + TIME(HOUR(HoraAtual), 30, 0))
+			
+			return
+			  
+			intervalo_atual
+			
+			
+			
+			
+			```
+		formatString: General Date
+		lineageTag: 4392ac70-dcf0-4407-8651-3943da7d1e7e
+		summarizeBy: none
+
+		variation Variation
+			isDefault
+			relationship: 27a1fa1c-2d80-4c30-8311-76fda1447ffd
+			defaultHierarchy: LocalDateTable_524eb8d4-e37f-491a-bee7-c39d2e46fe30.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date = FORMAT('!DIM_CALENDARIO'[Data], "dd/mm/yyyy")
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 23d49220-ed9e-4b00-99ad-e77f952eb565
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Periodo = ```
+			
+			
+			var hora = HOUR('!DIM_CALENDARIO'[Data]) RETURN 
+			
+			SWITCH( TRUE(),
+			        hora < 6, "Madrugada",
+			        hora < 12, "Manhã",
+			        hora < 18, "Tarde",
+			        "Noite")
+			        
+			
+			
+			
+			```
+		lineageTag: 29708ac8-e6dc-405a-a93a-56d293a82398
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column Intervalo = HOUR('!DIM_CALENDARIO'[Data])*100+MINUTE('!DIM_CALENDARIO'[Data])
+		formatString: 00:00
+		lineageTag: 0b6d4764-8044-4713-9f12-306c1b078277
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	column Intervalo_Status = ```
+			
+			
+			var intervalo = '!DIM_CALENDARIO'[Intervalo_Atual] 
+			
+			
+			RETURN 
+			
+			
+			
+			SWITCH(TRUE(),
+			
+			    
+			        intervalo >= '!DIM_CALENDARIO'[Data],1,0)
+			
+			
+			
+			
+			
+			```
+		formatString: 0
+		lineageTag: 7e88988b-a8ba-44b9-9012-50c5b428421a
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Dia_Atual = ```
+			
+			var HoraAtual = NOW() - 3/24
+			var DiaAtual = DATE(YEAR(HoraAtual), MONTH(HoraAtual), DAY(HoraAtual))
+			return
+			  
+			  SWITCH( TRUE(),
+			  '!DIM_CALENDARIO'[Date] = DiaAtual, 1,0)
+			```
+		formatString: 0
+		lineageTag: 551b116d-822c-4a9e-bfe5-f6e52abe49b1
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Dia da Semana' = ```
+			
+			VAR NomeCompleto = FORMAT('!DIM_CALENDARIO'[Date], "dddd")
+			VAR NomeSemFeira = 
+			    IF(
+			        CONTAINSSTRING(NomeCompleto, "-"),
+			        LEFT(NomeCompleto, FIND("-", NomeCompleto) - 1),
+			        NomeCompleto
+			    )
+			RETURN UPPER(NomeSemFeira)
+			
+			
+			
+			
+			```
+		lineageTag: 1d303467-fa6b-4709-adf2-9cc5a216cafc
+		summarizeBy: none
+		sortByColumn: 'Ordem Dia da Semana'
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Ordem Dia da Semana' =
+			
+			
+			WEEKDAY('!DIM_CALENDARIO'[Date],1)
+		formatString: 0
+		lineageTag: 5b142dd1-eac6-43da-a50a-cac6f3409fab
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Intervalo Hora' =
+			
+			VAR DataInicio = '!DIM_CALENDARIO'[chave_intervalo]
+			VAR HoraInicio = HOUR(DataInicio)
+			VAR HoraFim = if( HoraInicio = 23, 0, HoraInicio + 1)
+			
+			RETURN
+			    FORMAT(HoraInicio, "00") & ":00:00" & " às " & FORMAT(HoraFim, "00") & ":00:00"
+		lineageTag: 6e72945f-8a2a-48ec-8d5a-a526ddb63cec
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Status Dia' = ```
+			
+			
+			 
+			VAR HJ = NOW() - 3/24
+			VAR HOJE = DATE(YEAR(HJ),MONTH(HJ),DAY(HJ))
+			
+			RETURN
+			
+			
+			IF('!DIM_CALENDARIO'[Date]=HOJE, "Dia Atual", FORMAT('!DIM_CALENDARIO'[Data],"dd/mm/yyyy"))
+			```
+		lineageTag: eedf3955-5475-41ec-8ed8-0069c984c437
+		summarizeBy: none
+		sortByColumn: Date
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Data Abrev' = FORMAT('!DIM_CALENDARIO'[Date], "DD/MM")
+		dataType: dateTime
+		formatString: DD/MM
+		lineageTag: a9b2bf8e-810e-4e05-ae79-b35f2ee16191
+		summarizeBy: none
+
+		variation Variation
+			isDefault
+			relationship: b9fc1542-9b3a-4d2d-a52e-408e62a7f0a5
+			defaultHierarchy: LocalDateTable_ea420781-1d0b-4d2c-bd08-3dc992ce715d.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+		annotation PBI_FormatHint = {"isCustom":true}
+
+	column Dia = DAY('!DIM_CALENDARIO'[Data])
+		formatString: 0
+		lineageTag: 3bc971c5-6f4d-4c59-b312-c21cb9378c93
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Semana =
+			
+			IF(AND('!DIM_CALENDARIO'[Dia]>=1,'!DIM_CALENDARIO'[Dia]<=7),"SEMANA 1",
+			    IF('!DIM_CALENDARIO'[Dia]<=14,"SEMANA 2",
+			        IF('!DIM_CALENDARIO'[Dia]<=21,"SEMANA 3", "SEMANA 4")
+			    )
+			)
+		lineageTag: 17a0a67a-90f4-4a1d-9d1f-b088c7796b68
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column Data_DiaSemana = ```
+			
+			FORMAT('!DIM_CALENDARIO'[Data], "dd/mm/yyyy") & " - " & 
+			FORMAT('!DIM_CALENDARIO'[Data], "ddd")
+			```
+		lineageTag: 28e1f9c0-3c06-4a85-9f7b-a8fe7456a77e
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition !DIM_CALENDARIO = calculated
+		mode: import
+		source =
+				
+				VAR MinDateTime = DATE(2025,01,01)
+				VAR MaxDateTime1 = SELECTEDVALUE('!DIM_ATUALIZAÇÃO'[Data e Hora Certa])+1
+				VAR MaxDateTime = DATEVALUE(MaxDateTime1)
+				VAR AdjustedMaxDateTime = MaxDateTime + TIME(0, 30, 0)
+				RETURN
+				    GENERATESERIES ( MinDateTime, AdjustedMaxDateTime, 30/1440 )
+
+	annotation PBI_Id = b1a94bdbafa9493bb5e3b7b3ef463030
+

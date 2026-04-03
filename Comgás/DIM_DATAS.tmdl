@@ -1,0 +1,62 @@
+table DIM_DATAS
+	lineageTag: 446128ab-af74-44ac-86c4-caba9de797a9
+
+	column funcional
+		dataType: string
+		lineageTag: ad07d33b-38f3-400d-a905-9639b255c204
+		summarizeBy: none
+		sourceColumn: funcional
+
+		annotation SummarizationSetBy = Automatic
+
+	column dtInício
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: b495255d-5206-4fe7-9fa3-0b8e2ce3a28f
+		summarizeBy: none
+		sourceColumn: dtInício
+
+		variation Variation
+			isDefault
+			relationship: 0c6e8722-5092-43ce-aa5d-d229f4dd73a6
+			defaultHierarchy: LocalDateTable_3ed866be-3381-4fcd-a8d9-772710c1d8b3.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column dtRecente
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 853a1e25-1c51-49a5-a9df-e8fff730a160
+		summarizeBy: none
+		sourceColumn: dtRecente
+
+		variation Variation
+			isDefault
+			relationship: 2cea7674-d25b-4cbf-a2b8-d2a4d5fef7cf
+			defaultHierarchy: LocalDateTable_98cf69ca-77bf-457e-9bf5-ec5e65627d61.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition DIM_DATAS = m
+		mode: import
+		queryGroup: DIMENSÕES
+		source =
+				let
+				    Fonte = PowerBI.Dataflows([]),
+				    #"cd285858-e86a-4854-ae7f-7fbf647a6920" = Fonte{[workspaceId="cd285858-e86a-4854-ae7f-7fbf647a6920"]}[Data],
+				    #"46015645-f474-46ff-bce3-145062ef6197" = #"cd285858-e86a-4854-ae7f-7fbf647a6920"{[dataflowId="46015645-f474-46ff-bce3-145062ef6197"]}[Data],
+				    Dim_dtinicio_dtfim = #"46015645-f474-46ff-bce3-145062ef6197"{[entity="Dim_dtinicio_dtfim"]}[Data],
+				    #"Linhas Filtradas" = Table.SelectRows(Dim_dtinicio_dtfim, each ([produto] = "COMGAS")),
+				    #"Colunas Renomeadas" = Table.RenameColumns(#"Linhas Filtradas",{{"Func", "funcional"}}),
+				    #"Linhas Agrupadas1" = Table.Group(#"Colunas Renomeadas", {"funcional"}, {{"dtInício", each List.Min([dtInício]), type nullable date}, {"dtRecente", each List.Max([dtRecente]), type nullable date}})
+				in
+				    #"Linhas Agrupadas1"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,184 @@
+table GENESYS_FT_ABANDONADAS
+	lineageTag: 496d6ab7-46ae-4f76-a782-1cf750f409c6
+
+	column ROUTING_SKILL_NAME
+		dataType: string
+		lineageTag: ee257c48-f2d2-49df-b067-4904845551e9
+		summarizeBy: none
+		sourceColumn: ROUTING_SKILL_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column DIVISION_NAME
+		dataType: string
+		lineageTag: 9ef1f404-6d51-45c5-9aa5-9eac9fcf3b1f
+		summarizeBy: none
+		sourceColumn: DIVISION_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column ABANDONADAS
+		dataType: double
+		lineageTag: baca033e-44f2-459d-90cd-f0537c7b23ae
+		summarizeBy: sum
+		sourceColumn: ABANDONADAS
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ABANDON_TIME
+		dataType: double
+		lineageTag: 63e70c23-917e-4dd2-95bf-0eebcd6b915e
+		summarizeBy: sum
+		sourceColumn: ABANDON_TIME
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Data Intervalo' = GENESYS_FT_ABANDONADAS[row_date] + GENESYS_FT_ABANDONADAS[starttime_a]
+		formatString: General Date
+		lineageTag: 09c980bb-7944-44aa-b28c-bd12c021205d
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'DATA HORA'
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 1ededeaa-bd8a-408a-8524-e76313dcea94
+		summarizeBy: none
+		sourceColumn: DATA HORA
+
+		variation Variation
+			isDefault
+			relationship: 358647e8-9541-4619-b22b-e905410bd9ac
+			defaultHierarchy: LocalDateTable_a5226567-bb1e-4a9e-b57a-65c85f57f5f7.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column STATUS_ABNDONADAS = ```
+			
+			
+			
+			SWITCH(TRUE(),
+			
+			GENESYS_FT_ABANDONADAS[ABANDON_TIME] <= 5,       "Abandonada até 5",
+			GENESYS_FT_ABANDONADAS[ABANDON_TIME] <= 10 ,     "Abandonada até 10",
+			GENESYS_FT_ABANDONADAS[ABANDON_TIME] <= 15,      "Abandonada até 15",
+			GENESYS_FT_ABANDONADAS[ABANDON_TIME] <= 20,      "Abandonada até 20",
+			GENESYS_FT_ABANDONADAS[ABANDON_TIME] <= 25,      "Abandonada até 25",
+			"Acima de 25")
+			
+			```
+		lineageTag: 3c2ddf5c-e73e-4b1b-a853-a36e018ec3ef
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column TEMPO_ABANDONO = GENESYS_FT_ABANDONADAS[ABANDON_TIME] * GENESYS_FT_ABANDONADAS[ABANDONADAS]
+		lineageTag: 4654dcfc-e8d8-4769-a776-cdcd84d3d9ce
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column CHAVE_INTERVALO = FORMAT(GENESYS_FT_ABANDONADAS[DATA HORA], "DD/MM/YYYY HH:MM:SS")
+		lineageTag: cdd1c466-7442-423f-b499-b6027f0bfe32
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column ROW_DATE
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: df975e8f-9b29-4b7b-9646-9b8e1862406c
+		summarizeBy: none
+		sourceColumn: ROW_DATE
+
+		variation Variation
+			isDefault
+			relationship: d8e01ccc-aa12-43b4-8fbb-06af5e3cebab
+			defaultHierarchy: LocalDateTable_3f7091ef-294e-4d26-8017-ccc00e900951.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column STARTTIME
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: a99d864a-7e24-49da-a9f0-935ac58b162b
+		summarizeBy: none
+		sourceColumn: STARTTIME
+
+		variation Variation
+			isDefault
+			relationship: 7333416a-0834-4e61-b1d1-5bd72318652e
+			defaultHierarchy: LocalDateTable_763e2e35-8fd2-4708-9091-d35efa54051b.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column QUEUE_NAME
+		dataType: string
+		lineageTag: 1f0667e2-3ba4-4a58-af18-cd003d3b6777
+		summarizeBy: none
+		sourceColumn: QUEUE_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column SKILL_NUM
+		dataType: string
+		lineageTag: c51e5171-da7c-4e37-90a1-6b03774be64c
+		summarizeBy: none
+		sourceColumn: SKILL_NUM
+
+		annotation SummarizationSetBy = Automatic
+
+	column id
+		dataType: int64
+		formatString: 0
+		lineageTag: 6b7bca6a-7944-4ffa-a602-385c4b85aae9
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+	column MD
+		dataType: string
+		lineageTag: a246d128-86a5-415e-a75c-943aa596813f
+		summarizeBy: none
+		sourceColumn: MD
+
+		annotation SummarizationSetBy = Automatic
+
+	column data_atualizacao
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 2c207e00-cbd9-456f-a0e6-c57c2d18a183
+		summarizeBy: none
+		sourceColumn: data_atualizacao
+
+		variation Variation
+			isDefault
+			relationship: b26cebd5-5569-4ca5-adac-a12302a0d217
+			defaultHierarchy: LocalDateTable_f68dc5ae-a124-4dcc-a7c1-4fd0d4734a5e.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	partition GENESYS_FT_ABANDONADAS = m
+		mode: import
+		queryGroup: 'FT D0 + D-1'
+		source =
+				let
+				    Fonte = Table.Combine({#"FT_ABANDONADAS_D-1", #"FT_ABANDONADAS_D-0"}),
+				    #"Linhas Filtradas" = Table.SelectRows(Fonte, each [DATA HORA] >= #"DATA INICIO GENESYS")
+				in
+				    #"Linhas Filtradas"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+

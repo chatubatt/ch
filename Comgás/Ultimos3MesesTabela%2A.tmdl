@@ -1,0 +1,163 @@
+table Ultimos3MesesTabela*
+	lineageTag: 2b950c16-a104-4c76-872a-2bcd58fa9188
+
+	column Mês/Ano
+		lineageTag: fd966c8c-e0fc-4cfb-8778-d4d4c3910da5
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Mês/Ano]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Dia semana'
+		lineageTag: 0cbbf3d5-5038-4bcf-85ff-f1ec4b1c9ab7
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Dia semana]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Data com Dia Abrev'
+		lineageTag: ced951b6-ab51-4bd8-9cf1-27e77487962a
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Data com Dia Abrev]
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrdemData
+		formatString: General Date
+		lineageTag: 6915f104-91c8-49d6-aeac-46535ae3f9d9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [OrdemData]
+
+		variation Variation
+			isDefault
+			relationship: c55ba78e-3443-4f1e-824b-4bad1f8644a3
+			defaultHierarchy: LocalDateTable_1030895f-abf8-4a64-9ae4-eee356484906.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column DiaSemanaNum
+		formatString: 0
+		lineageTag: f7fd477b-f714-499b-8459-0683c41217aa
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [DiaSemanaNum]
+
+		annotation SummarizationSetBy = Automatic
+
+	column SemanaNoMes
+		formatString: 0
+		lineageTag: 415a5ec6-528a-4636-b3fb-7ceb335b408e
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [SemanaNoMes]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Semana no Mês Nomeada'
+		lineageTag: bb3f6349-8a1b-4d95-b951-c9b511b47e01
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Semana no Mês Nomeada]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Date
+		formatString: Short Date
+		lineageTag: ca1a4b3b-5c26-4e63-a7cb-ae9468d1c2ef
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: !DIM_CALENDARIO[Date]
+
+		variation Variation
+			isDefault
+			relationship: 95ed9b7f-0106-466d-9d43-81dcc6598e16
+			defaultHierarchy: LocalDateTable_2671bc84-3f9b-41e0-8d7f-3ae9cd18d006.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition Ultimos3MesesTabela* = calculated
+		mode: import
+		source = ```
+				
+				VAR Hoje = TODAY()
+				VAR PrimeiroDia3MesesAtras = EOMONTH(Hoje, -3) + 1
+				VAR UltimoDiaMesAtual = EOMONTH(Hoje, 0)
+				
+				VAR TabelaFiltrada = 
+				    FILTER(
+				        '!DIM_CALENDARIO',
+				        '!DIM_CALENDARIO'[Date] >= PrimeiroDia3MesesAtras &&
+				        '!DIM_CALENDARIO'[Date] <= UltimoDiaMesAtual
+				    )
+				
+				VAR TabelaComColunas =
+				    ADDCOLUMNS(
+				        TabelaFiltrada,
+				        "Mês/Ano", 
+				            UPPER(LEFT(FORMAT('!DIM_CALENDARIO'[Date], "mmm") & "/" & YEAR('!DIM_CALENDARIO'[Date]), 1)) & 
+				            RIGHT(FORMAT('!DIM_CALENDARIO'[Date], "mmm") & "/" & YEAR('!DIM_CALENDARIO'[Date]), 7),
+				
+				        "Dia semana", 
+				            SWITCH(
+				                WEEKDAY('!DIM_CALENDARIO'[Date], 2),
+				                1, "seg",
+				                2, "ter",
+				                3, "qua",
+				                4, "qui",
+				                5, "sex",
+				                6, "sáb",
+				                7, "dom"
+				            ),
+				
+				        "Data com Dia Abrev", 
+				            FORMAT('!DIM_CALENDARIO'[Date], "dd/MM") & "-" & 
+				            SWITCH(
+				                WEEKDAY('!DIM_CALENDARIO'[Date], 2),
+				                1, "seg",
+				                2, "ter",
+				                3, "qua",
+				                4, "qui",
+				                5, "sex",
+				                6, "sáb",
+				                7, "dom"
+				            ),
+				
+				        "OrdemData", '!DIM_CALENDARIO'[Date],
+				        "DiaSemanaNum", WEEKDAY('!DIM_CALENDARIO'[Date], 2),
+				
+				        // Nova coluna - número da semana no mês
+				        "SemanaNoMes", INT((DAY('!DIM_CALENDARIO'[Date]) - 1) / 7) + 1,
+				
+				        // Nova coluna - legenda da semana no mês no formato desejado
+				        "Semana no Mês Nomeada",
+				            VAR SemanaNumero = INT((DAY('!DIM_CALENDARIO'[Date]) - 1) / 7) + 1
+				            VAR MesAno = FORMAT('!DIM_CALENDARIO'[Date], "MMM/yy")
+				            RETURN FORMAT(SemanaNumero, "0º") & " - " & MesAno
+				    )
+				
+				VAR TabelaResumo =
+				    SUMMARIZE(
+				        TabelaComColunas,
+				        '!DIM_CALENDARIO'[Date],
+				        [Mês/Ano],
+				        [Dia semana],
+				        [Data com Dia Abrev],
+				        [OrdemData],
+				        [DiaSemanaNum],
+				        [SemanaNoMes],
+				        [Semana no Mês Nomeada]
+				    )
+				
+				RETURN
+				    TabelaResumo
+				
+				```
+
+	annotation PBI_Id = 97c102f5d0aa40d689ce572656aebc52
+

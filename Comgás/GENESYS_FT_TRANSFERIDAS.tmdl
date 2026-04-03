@@ -1,0 +1,113 @@
+table GENESYS_FT_TRANSFERIDAS
+	lineageTag: 7378fe63-477a-4a30-9fde-79786b79deff
+
+	column row_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 68e01307-5ddc-4fc5-bbe6-e3bc960aa252
+		summarizeBy: none
+		sourceColumn: row_date
+
+		variation Variation
+			isDefault
+			relationship: 844c3564-8068-482f-8eb5-4cc6841554cb
+			defaultHierarchy: LocalDateTable_4e7c4673-55a9-4494-bd05-35acec1f446f.'Hierarquia de datas'
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+	column starttime_a
+		dataType: dateTime
+		formatString: Long Time
+		lineageTag: 7e356dbd-7960-478f-91db-2de29e04a334
+		summarizeBy: none
+		sourceColumn: starttime_a
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	column ROUTING_SKILL_NAME
+		dataType: string
+		lineageTag: 4f1c9696-c4d1-4bea-8da2-939e3aef811a
+		summarizeBy: none
+		sourceColumn: ROUTING_SKILL_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column DIVISION_NAME
+		dataType: string
+		lineageTag: a05f2e9b-df5f-4c44-b29b-0fa32f6c1456
+		summarizeBy: none
+		sourceColumn: DIVISION_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column TRANSFERRED_BLIND
+		dataType: double
+		lineageTag: dfda5aa6-c9d9-4d45-bcce-2fdc99d0202d
+		summarizeBy: sum
+		sourceColumn: TRANSFERRED_BLIND
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TRANSFERRED_CONSULT
+		dataType: double
+		lineageTag: 60e3a7d0-4492-49ac-91c5-08db10e9b161
+		summarizeBy: sum
+		sourceColumn: TRANSFERRED_CONSULT
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column TOTAL
+		dataType: double
+		lineageTag: 02844934-9c84-4dc3-908e-a9fbd01c08c1
+		summarizeBy: sum
+		sourceColumn: TOTAL
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'DATA HORA'
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: b14701be-8668-475a-aa19-cd092effa2eb
+		summarizeBy: none
+		sourceColumn: DATA HORA
+
+		variation Variation
+			isDefault
+			relationship: 6933c299-91b3-4931-ac82-23fa9654618b
+			defaultHierarchy: LocalDateTable_3f7a06b8-28e3-4a59-99e9-e9c01f6c29a2.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column CHAVE_INTERVALO = FORMAT(GENESYS_FT_TRANSFERIDAS[DATA HORA], "DD/MM/YYYY HH:MM:SS")
+		lineageTag: e283670a-73ed-47f1-8783-68e7a6c6ad38
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition GENESYS_FT_TRANSFERIDAS = m
+		mode: import
+		queryGroup: FT_GENESYS
+		source =
+				let
+				    Fonte = PowerBI.Dataflows(null),
+				    #"9099524d-5d03-49b4-b51f-776c29c149aa" = Fonte{[workspaceId="9099524d-5d03-49b4-b51f-776c29c149aa"]}[Data],
+				    #"b012f956-9b2b-414d-9044-53a673882a3f" = #"9099524d-5d03-49b4-b51f-776c29c149aa"{[dataflowId="b012f956-9b2b-414d-9044-53a673882a3f"]}[Data],
+				    COMGAS_GENESYS_FT_TRANSFERIDAS = #"b012f956-9b2b-414d-9044-53a673882a3f"{[entity="COMGAS_GENESYS_FT_TRANSFERIDAS"]}[Data],
+				    #"Linhas Filtradas" = Table.SelectRows(COMGAS_GENESYS_FT_TRANSFERIDAS, each [DATA HORA] >= #"DATA INICIO GENESYS")
+				in
+				    #"Linhas Filtradas"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Exception
+

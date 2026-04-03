@@ -1,0 +1,113 @@
+table GENESYS_FT_DESCONEXÃO
+	lineageTag: 5d276cf2-5bb9-4bac-a7d5-f95f371d420a
+
+	column row_date
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 7d91c818-2346-4f81-b9af-db8951634ad9
+		summarizeBy: none
+		sourceColumn: row_date
+
+		variation Variation
+			isDefault
+			relationship: 4a8d9364-35dc-435d-968d-fc829d56e703
+			defaultHierarchy: LocalDateTable_23e3fdfe-4d31-4a72-a7b4-8945bbf78a09.'Hierarquia de datas'
+
+		changedProperty = DataType
+
+		annotation SummarizationSetBy = Automatic
+
+	column starttime_a
+		dataType: dateTime
+		formatString: Long Time
+		lineageTag: a43f9028-9c63-4914-b33a-4bc3d9fa2395
+		summarizeBy: none
+		sourceColumn: starttime_a
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Time
+
+	column ROUTING_SKILL_NAME
+		dataType: string
+		lineageTag: e961ac10-7d11-4892-be56-bb6f9769cf1f
+		summarizeBy: none
+		sourceColumn: ROUTING_SKILL_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column DIVISION_NAME
+		dataType: string
+		lineageTag: 9b037844-cb45-4462-89fb-2c33787601fc
+		summarizeBy: none
+		sourceColumn: DIVISION_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Desonexão Agente'
+		dataType: double
+		lineageTag: 9133def9-29ee-43e8-adc2-d6ffefb48233
+		summarizeBy: sum
+		sourceColumn: Desonexão Agente
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Desonexão Cliente'
+		dataType: double
+		lineageTag: 48473f95-579d-417b-8c29-f1365a451a82
+		summarizeBy: sum
+		sourceColumn: Desonexão Cliente
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Desonexão Sistema'
+		dataType: double
+		lineageTag: 946acc17-7dd2-406a-8d92-54f44c471a1e
+		summarizeBy: sum
+		sourceColumn: Desonexão Sistema
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'DATA HORA'
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: 620d69e5-6f65-4b1e-91c2-e0b80e5f8165
+		summarizeBy: none
+		sourceColumn: DATA HORA
+
+		variation Variation
+			isDefault
+			relationship: e34d2f2a-5af0-4df4-831e-321a8153b177
+			defaultHierarchy: LocalDateTable_628cb122-c52f-4d16-a078-863df925e929.'Hierarquia de datas'
+
+		annotation SummarizationSetBy = Automatic
+
+	column CHAVE_INTERVALO = FORMAT('GENESYS_FT_DESCONEXÃO'[DATA HORA], "DD/MM/YYYY HH:MM:SS")
+		lineageTag: 53f5242b-0850-4fd7-a746-768b8341d8dc
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition GENESYS_FT_DESCONEXÃO = m
+		mode: import
+		queryGroup: FT_GENESYS
+		source =
+				let
+				    Fonte = PowerBI.Dataflows(null),
+				    #"9099524d-5d03-49b4-b51f-776c29c149aa" = Fonte{[workspaceId="9099524d-5d03-49b4-b51f-776c29c149aa"]}[Data],
+				    #"16014e47-f81d-4607-a226-d96f6da4d136" = #"9099524d-5d03-49b4-b51f-776c29c149aa"{[dataflowId="16014e47-f81d-4607-a226-d96f6da4d136"]}[Data],
+				    COMGAS_Ft__Desconexão = #"16014e47-f81d-4607-a226-d96f6da4d136"{[entity="COMGAS_Ft__Desconexão"]}[Data],
+				    #"Linhas Filtradas" = Table.SelectRows(COMGAS_Ft__Desconexão, each [DATA HORA] >= #"DATA INICIO GENESYS")
+				in
+				    #"Linhas Filtradas"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Exception
+

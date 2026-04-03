@@ -1,0 +1,72 @@
+table GENESYS_TABULACOES
+	lineageTag: fdbd28fb-fda9-46b9-90eb-d885e1be38a1
+
+	column DATA
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 62ce688a-81a0-4b6b-83c6-27ad24c6488c
+		summarizeBy: none
+		sourceColumn: DATA
+
+		annotation SummarizationSetBy = Automatic
+
+	column RESOURCE_NAME
+		dataType: string
+		lineageTag: 674a7e87-a4f3-4fca-8d3b-cd10f42e69ad
+		summarizeBy: none
+		sourceColumn: RESOURCE_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column WRAP_UP_NAME
+		dataType: string
+		lineageTag: 4907bdbb-ea04-44ab-ad87-1e02663cfea0
+		summarizeBy: none
+		sourceColumn: WRAP_UP_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column CONTAGEM
+		dataType: int64
+		formatString: 0
+		lineageTag: 88703fb8-a018-4168-a23d-9c19b1c5cb3f
+		summarizeBy: sum
+		sourceColumn: CONTAGEM
+
+		annotation SummarizationSetBy = Automatic
+
+	column ROUTING_SKILL_NAME
+		dataType: string
+		lineageTag: 21b2616b-c08a-41eb-b450-a1ca09c7f224
+		summarizeBy: none
+		sourceColumn: ROUTING_SKILL_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	column DIVISION_NAME
+		dataType: string
+		lineageTag: 231b0fb6-fac0-4d57-9b72-5af47a12ee37
+		summarizeBy: none
+		sourceColumn: DIVISION_NAME
+
+		annotation SummarizationSetBy = Automatic
+
+	partition GENESYS_TABULACOES = m
+		mode: import
+		queryGroup: FT_GENESYS
+		source =
+				let
+				    Fonte = PowerPlatform.Dataflows(null),
+				    Workspaces = Fonte{[Id="Workspaces"]}[Data],
+				    #"9099524d-5d03-49b4-b51f-776c29c149aa" = Workspaces{[workspaceId="9099524d-5d03-49b4-b51f-776c29c149aa"]}[Data],
+				    #"443c9337-18d7-4b99-9493-8991bb618ef5" = #"9099524d-5d03-49b4-b51f-776c29c149aa"{[dataflowId="443c9337-18d7-4b99-9493-8991bb618ef5"]}[Data],
+				    #"GENESYS_TABULACOES (Comgas)_" = #"443c9337-18d7-4b99-9493-8991bb618ef5"{[entity="GENESYS_TABULACOES (Comgas)",version=""]}[Data],
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"GENESYS_TABULACOES (Comgas)_",{{"DATA", type datetime}}),
+				    #"Linhas Filtradas" = Table.SelectRows(#"Tipo Alterado", each [DATA] >= #"DATA INICIO GENESYS")
+				in
+				    #"Linhas Filtradas"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
