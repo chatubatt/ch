@@ -1,0 +1,31 @@
+table Dim_Tooltip
+	lineageTag: b02ed278-c81d-4579-9b34-d22d7b0ac09d
+
+	column TooltipID
+		lineageTag: 5184f8a2-49f3-4f79-af37-1965c339affc
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [TooltipID]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Dim_Tooltip = calculated
+		mode: import
+		source = ```
+				
+				DATATABLE(
+				    "TooltipID", STRING,
+				    {
+				        {"NS"},
+				        {"Abandono"},
+				        {"TMO"},
+				        {"VOLUME_RECEBIDO"},
+				        {"VOLUME_ATENDIDO"},
+				        {"PAS"}
+				    }
+				)
+				
+				```
+
+	annotation PBI_Id = 5d7eafe25afa43089d966433b7caa162
+
